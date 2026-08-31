@@ -1,37 +1,29 @@
-    <!doctype html>
-    <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta
-                name="viewport"
-                content="width=device-width, initial-scale=1.0" />
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0" />
         <title>JourneyMatch - Question</title>
         <link
-        rel="stylesheet"
-        href="Style.css" />
+            rel="stylesheet"
+            href="Style.css" />
         <link
-        rel="stylesheet"
-        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+            rel="stylesheet"
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-        </head>
+    </head>
     <body>
         <div class="container-fluid text-left">
-        <a
-            class="title"
-            href="index.html"
-            ><h1>JourneyMatch</h1></a
-        >
-        <p>Find your Ideal Destination</p>
+            <a class="title" href="index.html"><h1>JourneyMatch</h1></a>
+            <p>Find your Ideal Destination</p>
         </div>
-        <div class="container text-center">
-        <h2></h2>
-        </div>
+        
         <div class="container text-center">
             <div class="form-group">
-                <form
-                    action="result.html"
-                    method="get">
+                <form id="recommendForm">
                     <label for="question">What are you looking for in three words?</label>
                     <input
                         type="text"
@@ -42,26 +34,70 @@
                         required />
                     <br />
                     <div class="row justify-content-center">
-                    <div class="col-xs-6 col-sm-4">
-                        <button
-                            type="submit"
-                            class="btn btn-primary btn-block">
-                            Submit
-                        </button>
-                    </div>
-                    <div class="col-xs-6 col-sm-4">
-                        <a
-                            href="question.html"
-                            class="btn btn-default btn-block"
-                            >Ask again?</a
-                        >
-                    </div>
+                        <div class="col-xs-6 col-sm-4">
+                            <button
+                                type="submit"
+                                class="btn btn-primary btn-block">
+                                Submit
+                            </button>
+                        </div>
+                        <div class="col-xs-6 col-sm-4">
+                            <a
+                                href="question.html"
+                                class="btn btn-default btn-block"
+                                >Ask again?</a
+                            >
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="container text-center">
-        <a href="index.html">Home</a>
+
+        <!-- Result Container to display backend response -->
+        <div class="container text-left" style="margin-top: 20px;">
+            <div id="result" class="alert alert-info" style="display: none; white-space: pre-wrap;"></div>
         </div>
+
+        <div class="container text-center">
+            <a href="index.html">Home</a>
+        </div>
+
+        <script>
+            document.getElementById('recommendForm').addEventListener('submit', async function(e) {
+                e.preventDefault(); // Stop standard form submission page reload
+
+                const questionInput = document.getElementById('question').value;
+                const resultDiv = document.getElementById('result');
+
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'alert alert-info';
+                resultDiv.innerText = 'Generating your destination recommendations...';
+
+                try {
+                    // Send API request to Python app backend
+                    const response = await fetch('http://127.0.0.1:5000/api/recommend', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ question: questionInput })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        resultDiv.className = 'alert alert-success';
+                        resultDiv.innerText = data.recommendation;
+                    } else {
+                        resultDiv.className = 'alert alert-danger';
+                        resultDiv.innerText = 'Error: ' + (data.error || 'Failed to fetch response');
+                    }
+                } catch (error) {
+                    resultDiv.className = 'alert alert-danger';
+                    resultDiv.innerText = 'Could not connect to the Python backend server.';
+                    console.error('API Error:', error);
+                }
+            });
+        </script>
     </body>
 </html>
