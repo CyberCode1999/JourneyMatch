@@ -1,0 +1,65 @@
+.carousel-inner .item img{
+	width: 70%;
+	max-width: 700px;
+	height: auto;
+	display: block;
+	margin: 0 auto;
+}
+
+/* Move carousel controls outward and improve visibility */
+.carousel-control{
+	width:40px;
+	height:40px;
+	top:50%;
+	transform:translateY(-50%);
+	background: transparent; /* removed gray circle */
+	border-radius:50%;
+	z-index:5;
+	opacity:1;
+}
+/* .carousel-control:hover{ background: rgba(0,0,0,0.12); } */
+.carousel-control .glyphicon{
+	color:#fff;
+	font-size:18px;
+	line-height:40px;
+}
+/* Force-remove any leftover background/shadow from other styles */
+.carousel-control,
+.carousel-control.left,
+.carousel-control.right{
+    background: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+.carousel-control:before{ background: none !important; }
+
+/* Center button row (Bootstrap 3 compatibility) */
+.row.justify-content-center {
+    text-align: center;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+}
+.row.justify-content-center .col-xs-6,
+.row.justify-content-center .col-sm-4 {
+    float: none;
+    display: inline-block;
+    vertical-align: top;
+}
+
+@media (min-width:768px){
+	/* Keep controls visible on larger screens */
+	.carousel-control.left{ left:10px; }
+	.carousel-control.right{ right:10px; }
+}
+@media (max-width:767px){
+	.carousel-control.left{ left:5px; }
+	.carousel-control.right{ right:5px; }
+}
+
+a.title{
+    color: #050505;
+    text-decoration: none;
+
+}
+
