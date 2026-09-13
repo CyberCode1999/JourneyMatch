@@ -20,7 +20,7 @@
             <a class="title" href="index.html"><h1>JourneyMatch</h1></a>
             <p>Find your Ideal Destination</p>
         </div>
-        
+
         <div class="container text-center">
             <div class="form-group">
                 <form id="recommendForm">
@@ -37,6 +37,7 @@
                         <div class="col-xs-6 col-sm-4">
                             <button
                                 type="submit"
+                                id="submitBtn"
                                 class="btn btn-primary btn-block">
                                 Submit
                             </button>
@@ -53,9 +54,9 @@
             </div>
         </div>
 
-        <!-- Result Container to display backend response -->
+        <!-- Status / error messages (on success the browser goes to result.html) -->
         <div class="container text-left" style="margin-top: 20px;">
-            <div id="result" class="alert alert-info" style="display: none; white-space: pre-wrap;"></div>
+            <div id="status" class="alert alert-info" style="display: none; white-space: pre-wrap;"></div>
         </div>
 
         <div class="container text-center">
@@ -63,39 +64,74 @@
         </div>
 
         <script>
-            document.getElementById('recommendForm').addEventListener('submit', async function(e) {
+            const API_URL = 'http://127.0.0.1:5000/api/recommend';
+
+            // UTF-8 safe base64url encoding, for passing the result through the URL hash
+            function toBase64Url(str) {
+                const bytes = new TextEncoder().encode(str);
+                let binary = '';
+                for (let i = 0; i < bytes.length; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary)
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+            }
+
+            document.getElementById('recommendForm').addEventListener('submit', async function (e) {
                 e.preventDefault(); // Stop standard form submission page reload
 
-                const questionInput = document.getElementById('question').value;
-                const resultDiv = document.getElementById('result');
+                const questionInput = document.getElementById('question').value.trim();
+                const statusDiv = document.getElementById('status');
+                const submitBtn = document.getElementById('submitBtn');
 
-                resultDiv.style.display = 'block';
-                resultDiv.className = 'alert alert-info';
-                resultDiv.innerText = 'Generating your destination recommendations...';
+                if (!questionInput) return;
+
+                submitBtn.disabled = true;
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'alert alert-info';
+                statusDiv.innerText = 'Generating your destination recommendations...';
 
                 try {
-                    // Send API request to Python app backend
-                    const response = await fetch('http://127.0.0.1:5000/api/recommend', {
+                    // Send API request to the Python (Flask) backend
+                    const response = await fetch(API_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ question: questionInput })
                     });
 
                     const data = await response.json();
 
-                    if (response.ok) {
-                        resultDiv.className = 'alert alert-success';
-                        resultDiv.innerText = data.recommendation;
+                    if (response.ok && (data.recommendation || data.destinations)) {
+                        const payload = {
+                            question: questionInput,
+                            destinations: data.destinations || [],
+                            raw: data.recommendation || ''
+                        };
+
+                        // Primary hand-off: browser storage (works when served over http://)
+                        try {
+                            localStorage.setItem('journeyPayload', JSON.stringify(payload));
+                            sessionStorage.setItem('journeyPayload', JSON.stringify(payload));
+                        } catch (storageError) {
+                            console.warn('Storage unavailable, using URL hand-off:', storageError);
+                        }
+
+                        // Backup hand-off: pass the data in the URL, so it works from file:// too.
+                        // base64url keeps the hash free of quotes, newlines and % signs.
+                        window.location.href = 'result.html#b64.' + toBase64Url(JSON.stringify(payload));
                     } else {
-                        resultDiv.className = 'alert alert-danger';
-                        resultDiv.innerText = 'Error: ' + (data.error || 'Failed to fetch response');
+                        statusDiv.className = 'alert alert-danger';
+                        statusDiv.innerText = 'Error: ' + (data.error || 'Failed to fetch response');
+                        submitBtn.disabled = false;
                     }
                 } catch (error) {
-                    resultDiv.className = 'alert alert-danger';
-                    resultDiv.innerText = 'Could not connect to the Python backend server.';
+                    statusDiv.className = 'alert alert-danger';
+                    statusDiv.innerText =
+                        'Could not connect to the Python backend server. Make sure testapp.py is running on port 5000.';
                     console.error('API Error:', error);
+                    submitBtn.disabled = false;
                 }
             });
         </script>
