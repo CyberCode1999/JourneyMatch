@@ -279,8 +279,8 @@
             var msg = 'No recommendations found. Please submit your request from the question page.';
             if (window.location.hash) {
                 msg = 'Data arrived in the URL but could not be read.\n\n' +
-                      (lastError || 'Unknown decoding error') +
-                      '\n\nHash starts with: ' + window.location.hash.slice(1, 60) + '...';
+                    (lastError || 'Unknown decoding error') +
+                    '\n\nHash starts with: ' + window.location.hash.slice(1, 60) + '...';
             }
             showMessage(msg);
             return;
