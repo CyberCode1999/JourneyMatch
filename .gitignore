@@ -1,2 +1,4 @@
-# Ignore a specific file
+# Ignore files
 .env
+.vs
+AIproject
