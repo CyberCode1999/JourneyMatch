@@ -1,336 +1,306 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
     <title>JourneyMatch - Result</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <style>
-        /* Self-contained carousel: no jQuery, no Bootstrap JS required */
-        #carousel {
-            position: relative;
-            background: #f7f7f7;
-            border: 1px solid #e3e3e3;
-            border-radius: 6px;
-            margin-top: 25px;
-            text-align: left;
-            overflow: hidden;
-        }
-        .slide {
-            display: none;
-            min-height: 250px;
-            padding: 32px 70px 55px;
-        }
-        .slide.active {
-            display: block;
-            animation: fade 0.35s ease;
-        }
-        @keyframes fade {
-            from { opacity: 0; transform: translateX(12px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-        .slide .rank {
-            display: inline-block;
-            width: 34px;
-            height: 34px;
-            line-height: 34px;
-            text-align: center;
-            border-radius: 50%;
-            background: #337ab7;
-            color: #fff;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .slide h3 {
-            margin: 6px 0 2px;
-        }
-        .slide .country {
-            color: #777;
-            font-style: italic;
-            margin-bottom: 14px;
-        }
-        .slide .description {
-            font-size: 16px;
-            white-space: pre-wrap;
-            margin: 0;
-        }
-        .slide .why {
-            margin: 14px 0 0;
-            padding-left: 12px;
-            border-left: 3px solid #c7ddf0;
-            color: #555;
-        }
-
-        .nav-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            border: none;
-            background: transparent;
-            color: #337ab7;
-            font-size: 34px;
-            line-height: 1;
-            padding: 8px 16px;
-            cursor: pointer;
-            opacity: 0.55;
-        }
-        .nav-arrow:hover  { opacity: 1; }
-        .nav-arrow:focus  { outline: none; }
-        #prevBtn { left: 2px; }
-        #nextBtn { right: 2px; }
-
-        #counter {
-            position: absolute;
-            top: 14px;
-            right: 22px;
-            font-size: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #999;
-        }
-        #dots {
-            position: absolute;
-            bottom: 16px;
-            left: 0; right: 0;
-            text-align: center;
-            margin: 0; padding: 0;
-            list-style: none;
-        }
-        #dots li {
-            display: inline-block;
-            width: 11px; height: 11px;
-            margin: 0 4px;
-            border: 1px solid #999;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        #dots li.active {
-            background: #337ab7;
-            border-color: #337ab7;
-        }
-        .message {
-            padding: 30px;
-            white-space: pre-wrap;
-        }
-    </style>
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+  </head>
+  <body>
     <div class="container-fluid text-left">
-        <a class="title" href="index.html"><h1>JourneyMatch</h1></a>
-        <p>Find your Ideal Destination</p>
+      <a
+        class="title"
+        href="index.html"
+        ><h1>JourneyMatch</h1></a
+      >
+      <p id="Slogen">Find your Ideal Destination</p>
     </div>
 
     <div class="container text-center">
-        <h2>Your Ideal Destinations</h2>
-        <p id="based-on">Based on your preferences, here are three destinations that match your criteria:</p>
+      <h2 id="ideal-destinations">Your Ideal Destinations</h2>
+      <p id="based-on">
+        Based on your preferences, here are three destinations that match your
+        criteria:
+      </p>
 
-        <div class="row">
-            <div class="col-md-8 col-md-offset-2">
-                <div id="carousel">
-                    <span id="counter"></span>
-                    <div id="slides">
-                        <div class="slide active"><p class="message">Loading your recommendations...</p></div>
-                    </div>
-                    <button id="prevBtn" class="nav-arrow" type="button" aria-label="Previous">&#8249;</button>
-                    <button id="nextBtn" class="nav-arrow" type="button" aria-label="Next">&#8250;</button>
-                    <ul id="dots"></ul>
-                </div>
-                <p class="text-muted" style="margin-top:8px; font-size:12px;">
-                    Use the arrows, the dots, or your keyboard's left/right keys.
-                </p>
+      <div class="row result-row">
+        <div class="col-md-8 col-md-offset-2">
+          <div id="carousel">
+            <span id="counter"></span>
+            <div id="slides">
+              <div class="slide active">
+                <p class="message">Loading your recommendations...</p>
+              </div>
             </div>
+            <button
+              id="prevBtn"
+              class="nav-arrow"
+              type="button"
+              aria-label="Previous">
+              &#8249;
+            </button>
+            <button
+              id="nextBtn"
+              class="nav-arrow"
+              type="button"
+              aria-label="Next">
+              &#8250;
+            </button>
+            <ul id="dots"></ul>
+          </div>
+          <p
+            class="text-muted"
+            style="margin-top: 8px; font-size: 12px">
+            Use the arrows, the dots, or your keyboard's left/right keys.
+          </p>
         </div>
+      </div>
 
-        <div class="container text-center" style="margin-top: 20px;">
-            <a href="question.html" class="btn btn-primary">Take the Quiz Again</a>
-        </div>
+      <div class="result-actions">
+        <a
+          href="question.html"
+          class="btn btn-primary"
+          id="back-to-question"
+          >Take the Quiz Again</a
+        >
+        <a
+          href="index.html"
+          class="btn btn-default"
+          id="back-to-home"
+          >Back to Home</a
+        >
+      </div>
     </div>
 
     <script>
-    (function () {
-        var slidesBox = document.getElementById('slides');
-        var dotsBox   = document.getElementById('dots');
-        var prevBtn   = document.getElementById('prevBtn');
-        var nextBtn   = document.getElementById('nextBtn');
-        var counter   = document.getElementById('counter');
-        var hint      = document.querySelector('.text-muted');
-        var current   = 0;
-        var lastError = '';
+      (function () {
+        var slidesBox = document.getElementById("slides");
+        var dotsBox = document.getElementById("dots");
+        var prevBtn = document.getElementById("prevBtn");
+        var nextBtn = document.getElementById("nextBtn");
+        var counter = document.getElementById("counter");
+        var hint = document.querySelector(".text-muted");
+        var current = 0;
+        var lastError = "";
 
         // UTF-8 safe base64url decoding
         function fromBase64Url(str) {
-            var b64 = str.replace(/-/g, '+').replace(/_/g, '/');
-            while (b64.length % 4) { b64 += '='; }
-            var binary = atob(b64);
-            var bytes = new Uint8Array(binary.length);
-            for (var i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return new TextDecoder().decode(bytes);
+          var b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+          while (b64.length % 4) {
+            b64 += "=";
+          }
+          var binary = atob(b64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return new TextDecoder().decode(bytes);
         }
 
         // ---- 1. Find the data: URL hash first, then storage --------------------
         function loadPayload() {
-            var hash = window.location.hash ? window.location.hash.slice(1) : '';
+          var hash = window.location.hash ? window.location.hash.slice(1) : "";
 
-            if (hash) {
-                var attempts = [];
-                if (hash.indexOf('b64.') === 0) {
-                    attempts.push(function () { return fromBase64Url(hash.slice(4)); });
-                }
-                attempts.push(function () { return fromBase64Url(hash); });
-                attempts.push(function () { return decodeURIComponent(hash); });
-                attempts.push(function () { return hash; });
-
-                for (var a = 0; a < attempts.length; a++) {
-                    try {
-                        var parsed = JSON.parse(attempts[a]());
-                        if (parsed && typeof parsed === 'object') return parsed;
-                    } catch (e) {
-                        lastError = e.name + ': ' + e.message;
-                    }
-                }
-                console.warn('Could not decode URL hash. Last error:', lastError);
+          if (hash) {
+            var attempts = [];
+            if (hash.indexOf("b64.") === 0) {
+              attempts.push(function () {
+                return fromBase64Url(hash.slice(4));
+              });
             }
+            attempts.push(function () {
+              return fromBase64Url(hash);
+            });
+            attempts.push(function () {
+              return decodeURIComponent(hash);
+            });
+            attempts.push(function () {
+              return hash;
+            });
 
-            var stores = [];
-            try { stores.push(sessionStorage.getItem('journeyPayload')); } catch (e) {}
-            try { stores.push(localStorage.getItem('journeyPayload')); } catch (e) {}
-            for (var i = 0; i < stores.length; i++) {
-                if (stores[i]) {
-                    try { return JSON.parse(stores[i]); } catch (e) {}
-                }
+            for (var a = 0; a < attempts.length; a++) {
+              try {
+                var parsed = JSON.parse(attempts[a]());
+                if (parsed && typeof parsed === "object") return parsed;
+              } catch (e) {
+                lastError = e.name + ": " + e.message;
+              }
             }
+            console.warn("Could not decode URL hash. Last error:", lastError);
+          }
 
-            // Legacy keys from the earlier version
-            try {
-                var legacy = localStorage.getItem('journeyResult');
-                if (legacy) {
-                    var legacyDest = [];
-                    try { legacyDest = JSON.parse(localStorage.getItem('journeyDestinations') || '[]'); } catch (e) {}
-                    return {
-                        question: localStorage.getItem('journeyQuestion') || '',
-                        destinations: legacyDest,
-                        raw: legacy
-                    };
-                }
-            } catch (e) {}
+          var stores = [];
+          try {
+            stores.push(sessionStorage.getItem("journeyPayload"));
+          } catch (e) {}
+          try {
+            stores.push(localStorage.getItem("journeyPayload"));
+          } catch (e) {}
+          for (var i = 0; i < stores.length; i++) {
+            if (stores[i]) {
+              try {
+                return JSON.parse(stores[i]);
+              } catch (e) {}
+            }
+          }
 
-            return null;
+          // Legacy keys from the earlier version
+          try {
+            var legacy = localStorage.getItem("journeyResult");
+            if (legacy) {
+              var legacyDest = [];
+              try {
+                legacyDest = JSON.parse(
+                  localStorage.getItem("journeyDestinations") || "[]",
+                );
+              } catch (e) {}
+              return {
+                question: localStorage.getItem("journeyQuestion") || "",
+                destinations: legacyDest,
+                raw: legacy,
+              };
+            }
+          } catch (e) {}
+
+          return null;
         }
 
         // ---- 2. Turn plain text into slides if the server couldn't parse JSON ---
         function slicePlainText(text) {
-            return text
-                .split(/\n\s*\n/)
-                .map(function (c) { return c.trim(); })
-                .filter(Boolean)
-                .map(function (chunk) {
-                    var lines = chunk.split('\n');
-                    return {
-                        name: lines[0].replace(/^[\s*#\-\d.)]+/, '').trim(),
-                        country: '',
-                        description: lines.slice(1).join('\n').trim() || chunk,
-                        why: ''
-                    };
-                });
+          return text
+            .split(/\n\s*\n/)
+            .map(function (c) {
+              return c.trim();
+            })
+            .filter(Boolean)
+            .map(function (chunk) {
+              var lines = chunk.split("\n");
+              return {
+                name: lines[0].replace(/^[\s*#\-\d.)]+/, "").trim(),
+                country: "",
+                description: lines.slice(1).join("\n").trim() || chunk,
+                why: "",
+              };
+            });
         }
 
         function el(tag, className, text) {
-            var node = document.createElement(tag);
-            if (className) node.className = className;
-            if (text) node.textContent = text;   // textContent = safe, no HTML injection
-            return node;
+          var node = document.createElement(tag);
+          if (className) node.className = className;
+          if (text) node.textContent = text; // textContent = safe, no HTML injection
+          return node;
         }
 
         function hideControls() {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-            dotsBox.style.display = 'none';
-            counter.style.display = 'none';
-            if (hint) hint.style.display = 'none';
+          prevBtn.style.display = "none";
+          nextBtn.style.display = "none";
+          dotsBox.style.display = "none";
+          counter.style.display = "none";
+          if (hint) hint.style.display = "none";
         }
 
         function showMessage(msg) {
-            slidesBox.innerHTML = '';
-            var slide = el('div', 'slide active');
-            slide.appendChild(el('p', 'message', msg));
-            slidesBox.appendChild(slide);
-            hideControls();
+          slidesBox.innerHTML = "";
+          var slide = el("div", "slide active");
+          slide.appendChild(el("p", "message", msg));
+          slidesBox.appendChild(slide);
+          hideControls();
         }
 
         function goTo(index) {
-            var slides = slidesBox.querySelectorAll('.slide');
-            var dots   = dotsBox.querySelectorAll('li');
-            if (!slides.length) return;
-            current = (index + slides.length) % slides.length;   // wraps around
-            for (var i = 0; i < slides.length; i++) {
-                slides[i].classList.toggle('active', i === current);
-                if (dots[i]) dots[i].classList.toggle('active', i === current);
-            }
-            counter.textContent = (current + 1) + ' / ' + slides.length;
+          var slides = slidesBox.querySelectorAll(".slide");
+          var dots = dotsBox.querySelectorAll("li");
+          if (!slides.length) return;
+          current = (index + slides.length) % slides.length; // wraps around
+          for (var i = 0; i < slides.length; i++) {
+            slides[i].classList.toggle("active", i === current);
+            if (dots[i]) dots[i].classList.toggle("active", i === current);
+          }
+          counter.textContent = current + 1 + " / " + slides.length;
         }
 
         // ---- 3. Render ---------------------------------------------------------
         var payload = loadPayload();
 
         if (!payload) {
-            var msg = 'No recommendations found. Please submit your request from the question page.';
-            if (window.location.hash) {
-                msg = 'Data arrived in the URL but could not be read.\n\n' +
-                      (lastError || 'Unknown decoding error') +
-                      '\n\nHash starts with: ' + window.location.hash.slice(1, 60) + '...';
-            }
-            showMessage(msg);
-            return;
+          var msg =
+            "No recommendations found. Please submit your request from the question page.";
+          if (window.location.hash) {
+            msg =
+              "Data arrived in the URL but could not be read.\n\n" +
+              (lastError || "Unknown decoding error") +
+              "\n\nHash starts with: " +
+              window.location.hash.slice(1, 60) +
+              "...";
+          }
+          showMessage(msg);
+          return;
         }
 
-        var destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
+        var destinations = Array.isArray(payload.destinations)
+          ? payload.destinations
+          : [];
         if (!destinations.length && payload.raw && payload.raw.trim()) {
-            destinations = slicePlainText(payload.raw);
+          destinations = slicePlainText(payload.raw);
         }
 
         if (!destinations.length) {
-            showMessage('The server replied but no destinations could be read from the response.');
-            return;
+          showMessage(
+            "The server replied but no destinations could be read from the response.",
+          );
+          return;
         }
 
         if (payload.question) {
-            document.getElementById('based-on').textContent =
-                'Based on your words: "' + payload.question + '"';
+          document.getElementById("based-on").textContent =
+            'Based on your words: "' + payload.question + '"';
         }
 
-        slidesBox.innerHTML = '';
-        dotsBox.innerHTML = '';
+        slidesBox.innerHTML = "";
+        dotsBox.innerHTML = "";
 
         destinations.forEach(function (dest, i) {
-            var slide = el('div', 'slide' + (i === 0 ? ' active' : ''));
-            slide.appendChild(el('div', 'rank', String(i + 1)));
-            slide.appendChild(el('h3', null, dest.name || 'Destination ' + (i + 1)));
-            if (dest.country) slide.appendChild(el('p', 'country', dest.country));
-            slide.appendChild(el('p', 'description', dest.description || ''));
-            if (dest.why) slide.appendChild(el('p', 'why', dest.why));
-            slidesBox.appendChild(slide);
+          var slide = el("div", "slide" + (i === 0 ? " active" : ""));
+          slide.appendChild(el("div", "rank", String(i + 1)));
+          slide.appendChild(
+            el("h3", null, dest.name || "Destination " + (i + 1)),
+          );
+          if (dest.country) slide.appendChild(el("p", "country", dest.country));
+          slide.appendChild(el("p", "description", dest.description || ""));
+          if (dest.why) slide.appendChild(el("p", "why", dest.why));
+          slidesBox.appendChild(slide);
 
-            var dot = el('li', i === 0 ? 'active' : null);
-            dot.addEventListener('click', function () { goTo(i); });
-            dotsBox.appendChild(dot);
+          var dot = el("li", i === 0 ? "active" : null);
+          dot.addEventListener("click", function () {
+            goTo(i);
+          });
+          dotsBox.appendChild(dot);
         });
 
-        prevBtn.addEventListener('click', function () { goTo(current - 1); });
-        nextBtn.addEventListener('click', function () { goTo(current + 1); });
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'ArrowLeft')  goTo(current - 1);
-            if (e.key === 'ArrowRight') goTo(current + 1);
+        prevBtn.addEventListener("click", function () {
+          goTo(current - 1);
+        });
+        nextBtn.addEventListener("click", function () {
+          goTo(current + 1);
+        });
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowLeft") goTo(current - 1);
+          if (e.key === "ArrowRight") goTo(current + 1);
         });
 
         if (destinations.length < 2) {
-            hideControls();
+          hideControls();
         } else {
-            counter.textContent = '1 / ' + destinations.length;
+          counter.textContent = "1 / " + destinations.length;
         }
-    })();
+      })();
     </script>
-</body>
+  </body>
 </html>

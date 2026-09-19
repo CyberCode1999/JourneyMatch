@@ -1,139 +1,188 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1.0" />
-        <title>JourneyMatch - Question</title>
-        <link
-            rel="stylesheet"
-            href="Style.css" />
-        <link
-            rel="stylesheet"
-            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    </head>
-    <body>
-        <div class="container-fluid text-left">
-            <a class="title" href="index.html"><h1>JourneyMatch</h1></a>
-            <p>Find your Ideal Destination</p>
-        </div>
-
-        <div class="container text-center">
-            <div class="form-group">
-                <form id="recommendForm">
-                    <label for="question">What are you looking for in three words?</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        id="question"
-                        name="question"
-                        placeholder="Enter three words"
-                        required />
-                    <br />
-                    <div class="row justify-content-center">
-                        <div class="col-xs-6 col-sm-4">
-                            <button
-                                type="submit"
-                                id="submitBtn"
-                                class="btn btn-primary btn-block">
-                                Submit
-                            </button>
-                        </div>
-                        <div class="col-xs-6 col-sm-4">
-                            <a
-                                href="question.html"
-                                class="btn btn-default btn-block"
-                                >Ask again?</a
-                            >
-                        </div>
-                    </div>
-                </form>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>JourneyMatch - Question</title>
+    <link
+      rel="stylesheet"
+      href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <!-- Header banner -->
+    <div class="container-fluid text-left">
+      <a
+        class="title"
+        href="index.html"
+        ><h1>JourneyMatch</h1></a
+      >
+      <p id="Slogen">Find your Ideal Destination</p>
+    </div>
+    <!-- Form for user input
+        Going to add at least two more fields for questions. 
+        Each question will have a unique ID and label and on the same page -->
+    <div id="question-page">
+      <div
+        id="form"
+        style="
+          text-align: center;
+          max-width: 90%;
+          margin-left: auto;
+          margin-right: auto;
+        ">
+        <div class="form-group">
+          <form id="recommendForm">
+            <label
+              id="question"
+              for="question"
+              >What are you looking for in three words?</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="inputQuestion"
+              name="question"
+              placeholder="Enter three words"
+              required />
+            <br />
+            <div
+              style="
+                margin-top: 10px;
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 20px;
+              ">
+              <button
+                type="submit"
+                id="submitBtn"
+                class="btn btn-primary">
+                Submit
+              </button>
+              <a
+                id="again"
+                href="question.html"
+                class="btn btn-default"
+                >Ask again?</a
+              >
             </div>
+          </form>
         </div>
+      </div>
+    </div>
 
-        <!-- Status / error messages (on success the browser goes to result.html) -->
-        <div class="container text-left" style="margin-top: 20px;">
-            <div id="status" class="alert alert-info" style="display: none; white-space: pre-wrap;"></div>
-        </div>
+    <!-- Status / error messages (on success the browser goes to result.html) -->
+    <div
+      id="status-wrapper"
+      style="margin-top: 20px">
+      <div
+        id="status"
+        class="alert alert-info"
+        style="display: none; white-space: pre-wrap"></div>
+    </div>
 
-        <div class="container text-center">
-            <a href="index.html">Home</a>
-        </div>
+    <div class="container text-center">
+      <a
+        id="homeLink"
+        href="index.html"
+        >Home</a
+      >
+    </div>
 
-        <script>
-            const API_URL = 'http://127.0.0.1:5000/api/recommend';
+    <script>
+      const API_URL = "http://127.0.0.1:5000/api/recommend";
 
-            // UTF-8 safe base64url encoding, for passing the result through the URL hash
-            function toBase64Url(str) {
-                const bytes = new TextEncoder().encode(str);
-                let binary = '';
-                for (let i = 0; i < bytes.length; i++) {
-                    binary += String.fromCharCode(bytes[i]);
-                }
-                return btoa(binary)
-                    .replace(/\+/g, '-')
-                    .replace(/\//g, '_')
-                    .replace(/=+$/, '');
-            }
+      // UTF-8 safe base64url encoding, for passing the result through the URL hash
+      function toBase64Url(str) {
+        const bytes = new TextEncoder().encode(str);
+        let binary = "";
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary)
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+      }
 
-            document.getElementById('recommendForm').addEventListener('submit', async function (e) {
-                e.preventDefault(); // Stop standard form submission page reload
+      document
+        .getElementById("recommendForm")
+        .addEventListener("submit", async function (e) {
+          e.preventDefault(); // Stop standard form submission page reload
 
-                const questionInput = document.getElementById('question').value.trim();
-                const statusDiv = document.getElementById('status');
-                const submitBtn = document.getElementById('submitBtn');
+          const questionInput = document
+            .getElementById("inputQuestion")
+            .value.trim();
+          const statusDiv = document.getElementById("status");
+          const submitBtn = document.getElementById("submitBtn");
 
-                if (!questionInput) return;
+          if (!questionInput) return;
 
-                submitBtn.disabled = true;
-                statusDiv.style.display = 'block';
-                statusDiv.className = 'alert alert-info';
-                statusDiv.innerText = 'Generating your destination recommendations...';
+          submitBtn.disabled = true;
+          statusDiv.style.display = "flex";
+          statusDiv.className = "alert alert-info";
+          statusDiv.innerHTML =
+            '<span class="status-text">Generating your destination recommendations...</span>';
 
-                try {
-                    // Send API request to the Python (Flask) backend
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ question: questionInput })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && (data.recommendation || data.destinations)) {
-                        const payload = {
-                            question: questionInput,
-                            destinations: data.destinations || [],
-                            raw: data.recommendation || ''
-                        };
-
-                        // Primary hand-off: browser storage (works when served over http://)
-                        try {
-                            localStorage.setItem('journeyPayload', JSON.stringify(payload));
-                            sessionStorage.setItem('journeyPayload', JSON.stringify(payload));
-                        } catch (storageError) {
-                            console.warn('Storage unavailable, using URL hand-off:', storageError);
-                        }
-
-                        // Backup hand-off: pass the data in the URL, so it works from file:// too.
-                        // base64url keeps the hash free of quotes, newlines and % signs.
-                        window.location.href = 'result.html#b64.' + toBase64Url(JSON.stringify(payload));
-                    } else {
-                        statusDiv.className = 'alert alert-danger';
-                        statusDiv.innerText = 'Error: ' + (data.error || 'Failed to fetch response');
-                        submitBtn.disabled = false;
-                    }
-                } catch (error) {
-                    statusDiv.className = 'alert alert-danger';
-                    statusDiv.innerText =
-                        'Could not connect to the Python backend server. Make sure testapp.py is running on port 5000.';
-                    console.error('API Error:', error);
-                    submitBtn.disabled = false;
-                }
+          try {
+            // Send API request to the Python (Flask) backend
+            const response = await fetch(API_URL, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ question: questionInput }),
             });
-        </script>
-    </body>
+
+            const data = await response.json();
+
+            if (response.ok && (data.recommendation || data.destinations)) {
+              const payload = {
+                question: questionInput,
+                destinations: data.destinations || [],
+                raw: data.recommendation || "",
+              };
+
+              // Primary hand-off: browser storage (works when served over http://)
+              try {
+                localStorage.setItem("journeyPayload", JSON.stringify(payload));
+                sessionStorage.setItem(
+                  "journeyPayload",
+                  JSON.stringify(payload),
+                );
+              } catch (storageError) {
+                console.warn(
+                  "Storage unavailable, using URL hand-off:",
+                  storageError,
+                );
+              }
+
+              // Backup hand-off: pass the data in the URL, so it works from file:// too.
+              // base64url keeps the hash free of quotes, newlines and % signs.
+              window.location.href =
+                "result.html#b64." + toBase64Url(JSON.stringify(payload));
+            } else {
+              statusDiv.className = "alert alert-danger";
+              statusDiv.innerHTML =
+                '<span class="status-text">Error: ' +
+                (data.error || "Failed to fetch response") +
+                "</span>";
+              submitBtn.disabled = false;
+            }
+          } catch (error) {
+            statusDiv.className = "alert alert-danger";
+            statusDiv.innerHTML =
+              '<span class="status-text">Error: ' +
+              (error.message || "Something went wrong") +
+              "</span>";
+            submitBtn.disabled = false;
+          }
+        });
+    </script>
+  </body>
 </html>
