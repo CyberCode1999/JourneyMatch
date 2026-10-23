@@ -604,5 +604,10 @@ p{
     color: #153243 !important;
     opacity: 0.9;
 }
+.row {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+}
 
 .carousel-control:before { background: none !important; }

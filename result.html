@@ -1,306 +1,612 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JourneyMatch - Result</title>
-    <link
-      rel="stylesheet"
-      href="style.css" />
-    <link
-      rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
-  </head>
-  <body>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+        /* --- centring -------------------------------------------------------
+           style.css stretches every .row to 100vw with negative side margins,
+           which pushed this column off to the right. These rules opt the
+           result row out of that and keep the panel centred on the page.      */
+        .result-row {
+            width: auto;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            display: flex;
+            justify-content: center;
+        }
+        .result-row > [class*="col-"] {
+            float: none;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        /* Self-contained carousel: no jQuery, no Bootstrap JS required */
+        #carousel {
+            position: relative;
+            background: #f7f7f7;
+            border: 1px solid #e3e3e3;
+            border-radius: 6px;
+            margin-top: 25px;
+            text-align: left;
+            overflow: hidden;
+        }
+        .slide {
+            display: none;
+            min-height: 270px;
+            padding: 32px 70px 70px;
+            cursor: pointer;                 /* the whole slide is clickable */
+        }
+        .slide.active {
+            display: block;
+            animation: fade 0.35s ease;
+        }
+        @keyframes fade {
+            from { opacity: 0; transform: translateX(12px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        .slide .num {
+            display: inline-block;
+            width: 34px; height: 34px; line-height: 34px;
+            text-align: center;
+            border-radius: 50%;
+            background: #337ab7;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .slide h3 { margin: 6px 0 2px; }
+        .slide .country { color: #777; font-style: italic; margin-bottom: 14px; }
+        .slide .description { font-size: 16px; white-space: pre-wrap; margin: 0; }
+        .slide .why {
+            margin: 14px 0 0;
+            padding-left: 12px;
+            border-left: 3px solid #c7ddf0;
+            color: #555;
+        }
+
+        /* --- ranked selection ---------------------------------------------- */
+        .slide.picked {
+            background: #f1f9f1;
+            box-shadow: inset 4px 0 0 #5cb85c;
+        }
+        .slide.picked .num { background: #5cb85c; }
+        .slide .pick-btn {
+            margin-top: 18px;
+            pointer-events: none;            /* clicks handled by the slide */
+        }
+        .rank-flag {
+            display: none;
+            margin-left: 10px;
+            padding: 3px 10px;
+            border-radius: 10px;
+            background: #5cb85c;
+            color: #fff;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+        .slide.picked .rank-flag { display: inline-block; }
+
+        .nav-arrow {
+            position: absolute;
+            top: 45%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #337ab7;
+            font-size: 34px;
+            line-height: 1;
+            padding: 8px 16px;
+            cursor: pointer;
+            opacity: 0.55;
+        }
+        .nav-arrow:hover { opacity: 1; }
+        .nav-arrow:focus { outline: none; }
+        #prevBtn { left: 2px; }
+        #nextBtn { right: 2px; }
+
+        #counter {
+            position: absolute;
+            top: 14px; right: 22px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #999;
+        }
+        #dots {
+            position: absolute;
+            bottom: 16px; left: 0; right: 0;
+            text-align: center;
+            margin: 0; padding: 0;
+            list-style: none;
+        }
+        #dots li {
+            display: inline-block;
+            width: 11px; height: 11px;
+            margin: 0 4px;
+            border: 1px solid #999;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #dots li.active { background: #337ab7; border-color: #337ab7; }
+        #dots li.picked { background: #5cb85c; border-color: #5cb85c; }
+
+        /* --- the ranked shortlist ------------------------------------------ */
+        #shortlist-box {
+            display: none;
+            margin-top: 20px;
+            border: 1px solid #d6e9c6;
+            border-radius: 6px;
+            background: #f1f9f1;
+            padding: 16px 18px;
+            text-align: left;
+        }
+        #shortlist-box h4 { margin: 0 0 12px; }
+        #shortlist { list-style: none; margin: 0; padding: 0; }
+        #shortlist li {
+            padding: 8px 6px;
+            border-top: 1px solid #dceccd;
+        }
+        #shortlist li:first-child { border-top: none; }
+        #shortlist .pos {
+            display: inline-block;
+            width: 26px; height: 26px; line-height: 26px;
+            margin-right: 10px;
+            text-align: center;
+            border-radius: 50%;
+            background: #5cb85c;
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        #shortlist .where { font-weight: bold; }
+        #shortlist .controls { float: right; }
+        #shortlist .controls button {
+            border: 1px solid #c5dfb3;
+            background: #fff;
+            color: #3c763d;
+            border-radius: 3px;
+            width: 28px; height: 26px;
+            line-height: 1;
+            margin-left: 4px;
+            cursor: pointer;
+        }
+        #shortlist .controls button:disabled { opacity: 0.3; cursor: default; }
+        #shortlist .controls .remove { color: #a94442; border-color: #e0b4b4; }
+
+        .message { padding: 30px; white-space: pre-wrap; }
+        #cookie-note { display: none; font-size: 12px; margin-top: 8px; }
+    </style>
+</head>
+<body>
     <div class="container-fluid text-left">
-      <a
-        class="title"
-        href="index.html"
-        ><h1>JourneyMatch</h1></a
-      >
-      <p id="Slogen">Find your Ideal Destination</p>
+        <a class="title" href="index.html"><h1>JourneyMatch</h1></a>
+        <p>Find your Ideal Destination</p>
     </div>
 
     <div class="container text-center">
-      <h2 id="ideal-destinations">Your Ideal Destinations</h2>
-      <p id="based-on">
-        Based on your preferences, here are three destinations that match your
-        criteria:
-      </p>
+        <h2 id="ideal-destinations">Your Ideal Destinations</h2>
+        <p id="based-on">Based on your preferences, here are three destinations that match your criteria:</p>
 
-      <div class="row result-row">
-        <div class="col-md-8 col-md-offset-2">
-          <div id="carousel">
-            <span id="counter"></span>
-            <div id="slides">
-              <div class="slide active">
-                <p class="message">Loading your recommendations...</p>
-              </div>
+        <!-- result-row opts out of the 100vw .row rule in style.css -->
+        <div class="row result-row">
+            <div class="col-md-8">
+                <div id="carousel">
+                    <span id="counter"></span>
+                    <div id="slides">
+                        <div class="slide active"><p class="message">Loading your recommendations...</p></div>
+                    </div>
+                    <button id="prevBtn" class="nav-arrow" type="button" aria-label="Previous">&#8249;</button>
+                    <button id="nextBtn" class="nav-arrow" type="button" aria-label="Next">&#8250;</button>
+                    <ul id="dots"></ul>
+                </div>
+
+                <p class="text-muted" id="hint" style="margin-top:8px; font-size:12px;">
+                    Arrows, dots or left/right keys to browse &middot;
+                    click destinations in the order you prefer them
+                </p>
+
+                <div id="shortlist-box">
+                    <button type="button" class="close" id="clearAll" aria-label="Clear all">&times;</button>
+                    <h4>Your preferences, most wanted first</h4>
+                    <ul id="shortlist"></ul>
+                </div>
+
+                <p class="text-muted" id="cookie-note"></p>
             </div>
-            <button
-              id="prevBtn"
-              class="nav-arrow"
-              type="button"
-              aria-label="Previous">
-              &#8249;
-            </button>
-            <button
-              id="nextBtn"
-              class="nav-arrow"
-              type="button"
-              aria-label="Next">
-              &#8250;
-            </button>
-            <ul id="dots"></ul>
-          </div>
-          <p
-            class="text-muted"
-            style="margin-top: 8px; font-size: 12px">
-            Use the arrows, the dots, or your keyboard's left/right keys.
-          </p>
         </div>
-      </div>
 
-      <div class="result-actions">
-        <a
-          href="question.html"
-          class="btn btn-primary"
-          id="back-to-question"
-          >Take the Quiz Again</a
-        >
-        <a
-          href="index.html"
-          class="btn btn-default"
-          id="back-to-home"
-          >Back to Home</a
-        >
-      </div>
+        <div class="result-actions">
+            <a href="question.html" id="back-to-question" class="btn">Take the Quiz Again</a>
+            <a href="index.html" id="back-to-home" class="btn">Home</a>
+        </div>
     </div>
 
     <script>
-      (function () {
-        var slidesBox = document.getElementById("slides");
-        var dotsBox = document.getElementById("dots");
-        var prevBtn = document.getElementById("prevBtn");
-        var nextBtn = document.getElementById("nextBtn");
-        var counter = document.getElementById("counter");
-        var hint = document.querySelector(".text-muted");
+    (function () {
+        var slidesBox = document.getElementById('slides');
+        var dotsBox   = document.getElementById('dots');
+        var prevBtn   = document.getElementById('prevBtn');
+        var nextBtn   = document.getElementById('nextBtn');
+        var counter   = document.getElementById('counter');
+        var listBox   = document.getElementById('shortlist-box');
+        var listEl    = document.getElementById('shortlist');
+        var clearAll  = document.getElementById('clearAll');
+        var hint      = document.getElementById('hint');
+        var note      = document.getElementById('cookie-note');
+
+        var COOKIE = 'jm_preferences';
         var current = 0;
-        var lastError = "";
+        var picks = [];            // destination indexes, best first
+        var destinations = [];
+        var questionText = '';
+        var lastError = '';
 
-        // UTF-8 safe base64url decoding
+        /* ================= cookie helpers =================================
+           No "expires"/"max-age" => a SESSION cookie: it lives until the
+           browser is closed.                                                */
+        function setSessionCookie(name, value) {
+            document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; SameSite=Lax';
+        }
+        function getCookie(name) {
+            var parts = document.cookie ? document.cookie.split('; ') : [];
+            for (var i = 0; i < parts.length; i++) {
+                var eq = parts[i].indexOf('=');
+                if (parts[i].slice(0, eq) === name) {
+                    return decodeURIComponent(parts[i].slice(eq + 1));
+                }
+            }
+            return '';
+        }
+        function deleteCookie(name) {
+            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        }
+        // Chrome ignores document.cookie on file:// — detect it and fall back
+        function cookiesWork() {
+            try {
+                document.cookie = 'jm_test=1; path=/; SameSite=Lax';
+                var ok = document.cookie.indexOf('jm_test=1') !== -1;
+                deleteCookie('jm_test');
+                return ok;
+            } catch (e) { return false; }
+        }
+        var COOKIES_OK = cookiesWork();
+
+        function savePicks() {
+            if (!picks.length) {
+                deleteCookie(COOKIE);
+                try { sessionStorage.removeItem(COOKIE); } catch (e) {}
+                return;
+            }
+            // Ranked list, position 1 = most wanted. Kept compact: cookies cap at ~4KB.
+            var ranked = picks.map(function (destIndex, position) {
+                var d = destinations[destIndex] || {};
+                return {
+                    rank: position + 1,
+                    name: d.name || '',
+                    country: d.country || '',
+                    index: destIndex
+                };
+            });
+            var json = JSON.stringify({ question: questionText, picks: ranked, at: new Date().toISOString() });
+            if (COOKIES_OK) {
+                setSessionCookie(COOKIE, json);
+            } else {
+                try { sessionStorage.setItem(COOKIE, json); } catch (e) {}
+            }
+        }
+        function readPicks() {
+            var raw = COOKIES_OK ? getCookie(COOKIE) : '';
+            if (!raw) { try { raw = sessionStorage.getItem(COOKIE) || ''; } catch (e) {} }
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch (e) { return null; }
+        }
+
+        /* ================= payload decoding =============================== */
         function fromBase64Url(str) {
-          var b64 = str.replace(/-/g, "+").replace(/_/g, "/");
-          while (b64.length % 4) {
-            b64 += "=";
-          }
-          var binary = atob(b64);
-          var bytes = new Uint8Array(binary.length);
-          for (var i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
-          }
-          return new TextDecoder().decode(bytes);
+            var b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (b64.length % 4) { b64 += '='; }
+            var binary = atob(b64);
+            var bytes = new Uint8Array(binary.length);
+            for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+            return new TextDecoder().decode(bytes);
         }
 
-        // ---- 1. Find the data: URL hash first, then storage --------------------
         function loadPayload() {
-          var hash = window.location.hash ? window.location.hash.slice(1) : "";
-
-          if (hash) {
-            var attempts = [];
-            if (hash.indexOf("b64.") === 0) {
-              attempts.push(function () {
-                return fromBase64Url(hash.slice(4));
-              });
+            var hash = window.location.hash ? window.location.hash.slice(1) : '';
+            if (hash) {
+                var attempts = [];
+                if (hash.indexOf('b64.') === 0) {
+                    attempts.push(function () { return fromBase64Url(hash.slice(4)); });
+                }
+                attempts.push(function () { return fromBase64Url(hash); });
+                attempts.push(function () { return decodeURIComponent(hash); });
+                attempts.push(function () { return hash; });
+                for (var a = 0; a < attempts.length; a++) {
+                    try {
+                        var parsed = JSON.parse(attempts[a]());
+                        if (parsed && typeof parsed === 'object') return parsed;
+                    } catch (e) { lastError = e.name + ': ' + e.message; }
+                }
+                console.warn('Could not decode URL hash. Last error:', lastError);
             }
-            attempts.push(function () {
-              return fromBase64Url(hash);
-            });
-            attempts.push(function () {
-              return decodeURIComponent(hash);
-            });
-            attempts.push(function () {
-              return hash;
-            });
-
-            for (var a = 0; a < attempts.length; a++) {
-              try {
-                var parsed = JSON.parse(attempts[a]());
-                if (parsed && typeof parsed === "object") return parsed;
-              } catch (e) {
-                lastError = e.name + ": " + e.message;
-              }
+            var stores = [];
+            try { stores.push(sessionStorage.getItem('journeyPayload')); } catch (e) {}
+            try { stores.push(localStorage.getItem('journeyPayload')); } catch (e) {}
+            for (var i = 0; i < stores.length; i++) {
+                if (stores[i]) { try { return JSON.parse(stores[i]); } catch (e) {} }
             }
-            console.warn("Could not decode URL hash. Last error:", lastError);
-          }
-
-          var stores = [];
-          try {
-            stores.push(sessionStorage.getItem("journeyPayload"));
-          } catch (e) {}
-          try {
-            stores.push(localStorage.getItem("journeyPayload"));
-          } catch (e) {}
-          for (var i = 0; i < stores.length; i++) {
-            if (stores[i]) {
-              try {
-                return JSON.parse(stores[i]);
-              } catch (e) {}
-            }
-          }
-
-          // Legacy keys from the earlier version
-          try {
-            var legacy = localStorage.getItem("journeyResult");
-            if (legacy) {
-              var legacyDest = [];
-              try {
-                legacyDest = JSON.parse(
-                  localStorage.getItem("journeyDestinations") || "[]",
-                );
-              } catch (e) {}
-              return {
-                question: localStorage.getItem("journeyQuestion") || "",
-                destinations: legacyDest,
-                raw: legacy,
-              };
-            }
-          } catch (e) {}
-
-          return null;
+            try {
+                var legacy = localStorage.getItem('journeyResult');
+                if (legacy) {
+                    var legacyDest = [];
+                    try { legacyDest = JSON.parse(localStorage.getItem('journeyDestinations') || '[]'); } catch (e) {}
+                    return {
+                        question: localStorage.getItem('journeyQuestion') || '',
+                        destinations: legacyDest,
+                        raw: legacy
+                    };
+                }
+            } catch (e) {}
+            return null;
         }
 
-        // ---- 2. Turn plain text into slides if the server couldn't parse JSON ---
         function slicePlainText(text) {
-          return text
-            .split(/\n\s*\n/)
-            .map(function (c) {
-              return c.trim();
-            })
-            .filter(Boolean)
-            .map(function (chunk) {
-              var lines = chunk.split("\n");
-              return {
-                name: lines[0].replace(/^[\s*#\-\d.)]+/, "").trim(),
-                country: "",
-                description: lines.slice(1).join("\n").trim() || chunk,
-                why: "",
-              };
-            });
+            return text.split(/\n\s*\n/)
+                .map(function (c) { return c.trim(); })
+                .filter(Boolean)
+                .map(function (chunk) {
+                    var lines = chunk.split('\n');
+                    return {
+                        name: lines[0].replace(/^[\s*#\-\d.)]+/, '').trim(),
+                        country: '',
+                        description: lines.slice(1).join('\n').trim() || chunk,
+                        why: ''
+                    };
+                });
         }
 
+        /* ================= rendering ====================================== */
         function el(tag, className, text) {
-          var node = document.createElement(tag);
-          if (className) node.className = className;
-          if (text) node.textContent = text; // textContent = safe, no HTML injection
-          return node;
+            var node = document.createElement(tag);
+            if (className) node.className = className;
+            if (text) node.textContent = text;   // textContent = safe, no HTML injection
+            return node;
         }
 
         function hideControls() {
-          prevBtn.style.display = "none";
-          nextBtn.style.display = "none";
-          dotsBox.style.display = "none";
-          counter.style.display = "none";
-          if (hint) hint.style.display = "none";
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            dotsBox.style.display = 'none';
+            counter.style.display = 'none';
+            if (hint) hint.style.display = 'none';
         }
 
         function showMessage(msg) {
-          slidesBox.innerHTML = "";
-          var slide = el("div", "slide active");
-          slide.appendChild(el("p", "message", msg));
-          slidesBox.appendChild(slide);
-          hideControls();
+            slidesBox.innerHTML = '';
+            var slide = el('div', 'slide active');
+            slide.style.cursor = 'default';
+            slide.appendChild(el('p', 'message', msg));
+            slidesBox.appendChild(slide);
+            hideControls();
         }
 
         function goTo(index) {
-          var slides = slidesBox.querySelectorAll(".slide");
-          var dots = dotsBox.querySelectorAll("li");
-          if (!slides.length) return;
-          current = (index + slides.length) % slides.length; // wraps around
-          for (var i = 0; i < slides.length; i++) {
-            slides[i].classList.toggle("active", i === current);
-            if (dots[i]) dots[i].classList.toggle("active", i === current);
-          }
-          counter.textContent = current + 1 + " / " + slides.length;
+            var slides = slidesBox.querySelectorAll('.slide');
+            var dots   = dotsBox.querySelectorAll('li');
+            if (!slides.length) return;
+            current = (index + slides.length) % slides.length;   // wraps around
+            for (var i = 0; i < slides.length; i++) {
+                slides[i].classList.toggle('active', i === current);
+                if (dots[i]) dots[i].classList.toggle('active', i === current);
+            }
+            counter.textContent = (current + 1) + ' / ' + slides.length;
         }
 
-        // ---- 3. Render ---------------------------------------------------------
+        function ordinal(n) {
+            var suffix = (n % 100 >= 11 && n % 100 <= 13) ? 'th'
+                       : ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
+            return n + suffix;
+        }
+
+        /* --- paint slides + shortlist from `picks` -------------------------- */
+        function paint() {
+            var slides = slidesBox.querySelectorAll('.slide');
+            var dots   = dotsBox.querySelectorAll('li');
+
+            for (var i = 0; i < slides.length; i++) {
+                var position = picks.indexOf(i);           // -1 when not picked
+                var isPicked = position !== -1;
+
+                slides[i].classList.toggle('picked', isPicked);
+                if (dots[i]) dots[i].classList.toggle('picked', isPicked);
+
+                var flag = slides[i].querySelector('.rank-flag');
+                if (flag) flag.textContent = ordinal(position + 1) + ' choice';
+
+                var btn = slides[i].querySelector('.pick-btn');
+                if (btn) {
+                    btn.className = 'btn pick-btn ' + (isPicked ? 'btn-success' : 'btn-default');
+                    btn.textContent = isPicked
+                        ? '✓ ' + ordinal(position + 1) + ' choice — click to remove'
+                        : (picks.length ? 'Add as ' + ordinal(picks.length + 1) + ' choice'
+                                        : 'Pick this as your first choice');
+                }
+            }
+
+            // the ranked shortlist underneath
+            listEl.innerHTML = '';
+            picks.forEach(function (destIndex, position) {
+                var dest = destinations[destIndex] || {};
+                var row = document.createElement('li');
+
+                var controls = el('span', 'controls');
+
+                var up = el('button', null, '▲');
+                up.type = 'button';
+                up.title = 'Move up';
+                up.disabled = position === 0;
+                up.addEventListener('click', function () { move(position, -1); });
+
+                var down = el('button', null, '▼');
+                down.type = 'button';
+                down.title = 'Move down';
+                down.disabled = position === picks.length - 1;
+                down.addEventListener('click', function () { move(position, 1); });
+
+                var rm = el('button', 'remove', '×');
+                rm.type = 'button';
+                rm.title = 'Remove';
+                rm.addEventListener('click', function () { toggle(destIndex); });
+
+                controls.appendChild(up);
+                controls.appendChild(down);
+                controls.appendChild(rm);
+                row.appendChild(controls);
+
+                row.appendChild(el('span', 'pos', String(position + 1)));
+                row.appendChild(el('span', 'where', dest.name || 'Destination ' + (destIndex + 1)));
+                if (dest.country) row.appendChild(el('span', null, ', ' + dest.country));
+
+                listEl.appendChild(row);
+            });
+
+            listBox.style.display = picks.length ? 'block' : 'none';
+            savePicks();
+        }
+
+        function toggle(destIndex) {
+            var position = picks.indexOf(destIndex);
+            if (position === -1) {
+                picks.push(destIndex);          // click order = preference order
+            } else {
+                picks.splice(position, 1);      // clicking again removes it
+            }
+            paint();
+        }
+
+        function move(position, delta) {
+            var target = position + delta;
+            if (target < 0 || target >= picks.length) return;
+            var moved = picks.splice(position, 1)[0];
+            picks.splice(target, 0, moved);
+            paint();
+        }
+
+        /* ================= boot =========================================== */
         var payload = loadPayload();
 
         if (!payload) {
-          var msg =
-            "No recommendations found. Please submit your request from the question page.";
-          if (window.location.hash) {
-            msg =
-              "Data arrived in the URL but could not be read.\n\n" +
-              (lastError || "Unknown decoding error") +
-              "\n\nHash starts with: " +
-              window.location.hash.slice(1, 60) +
-              "...";
-          }
-          showMessage(msg);
-          return;
+            var msg = 'No recommendations found. Please submit your request from the question page.';
+            if (window.location.hash) {
+                msg = 'Data arrived in the URL but could not be read.\n\n' +
+                      (lastError || 'Unknown decoding error') +
+                      '\n\nHash starts with: ' + window.location.hash.slice(1, 60) + '...';
+            }
+            showMessage(msg);
+            return;
         }
 
-        var destinations = Array.isArray(payload.destinations)
-          ? payload.destinations
-          : [];
+        destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
         if (!destinations.length && payload.raw && payload.raw.trim()) {
-          destinations = slicePlainText(payload.raw);
+            destinations = slicePlainText(payload.raw);
         }
-
         if (!destinations.length) {
-          showMessage(
-            "The server replied but no destinations could be read from the response.",
-          );
-          return;
+            showMessage('The server replied but no destinations could be read from the response.');
+            return;
         }
 
-        if (payload.question) {
-          document.getElementById("based-on").textContent =
-            'Based on your words: "' + payload.question + '"';
+        questionText = payload.question || '';
+        if (questionText) {
+            document.getElementById('based-on').textContent =
+                'Based on your words: "' + questionText + '"';
         }
 
-        slidesBox.innerHTML = "";
-        dotsBox.innerHTML = "";
+        slidesBox.innerHTML = '';
+        dotsBox.innerHTML = '';
 
         destinations.forEach(function (dest, i) {
-          var slide = el("div", "slide" + (i === 0 ? " active" : ""));
-          slide.appendChild(el("div", "rank", String(i + 1)));
-          slide.appendChild(
-            el("h3", null, dest.name || "Destination " + (i + 1)),
-          );
-          if (dest.country) slide.appendChild(el("p", "country", dest.country));
-          slide.appendChild(el("p", "description", dest.description || ""));
-          if (dest.why) slide.appendChild(el("p", "why", dest.why));
-          slidesBox.appendChild(slide);
+            var slide = el('div', 'slide' + (i === 0 ? ' active' : ''));
+            slide.setAttribute('role', 'button');
+            slide.setAttribute('tabindex', '0');
 
-          var dot = el("li", i === 0 ? "active" : null);
-          dot.addEventListener("click", function () {
-            goTo(i);
-          });
-          dotsBox.appendChild(dot);
+            slide.appendChild(el('div', 'num', String(i + 1)));
+
+            var heading = el('h3', null, dest.name || 'Destination ' + (i + 1));
+            heading.appendChild(el('span', 'rank-flag', ''));
+            slide.appendChild(heading);
+
+            if (dest.country) slide.appendChild(el('p', 'country', dest.country));
+            slide.appendChild(el('p', 'description', dest.description || ''));
+            if (dest.why) slide.appendChild(el('p', 'why', dest.why));
+
+            var btn = el('button', 'btn btn-default pick-btn', 'Pick this destination');
+            btn.type = 'button';
+            slide.appendChild(btn);
+
+            slide.addEventListener('click', function () { toggle(i); });
+            slide.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(i); }
+            });
+
+            slidesBox.appendChild(slide);
+
+            var dot = el('li', i === 0 ? 'active' : null);
+            dot.addEventListener('click', function () { goTo(i); });
+            dotsBox.appendChild(dot);
         });
 
-        prevBtn.addEventListener("click", function () {
-          goTo(current - 1);
+        prevBtn.addEventListener('click', function () { goTo(current - 1); });
+        nextBtn.addEventListener('click', function () { goTo(current + 1); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowLeft')  goTo(current - 1);
+            if (e.key === 'ArrowRight') goTo(current + 1);
         });
-        nextBtn.addEventListener("click", function () {
-          goTo(current + 1);
-        });
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "ArrowLeft") goTo(current - 1);
-          if (e.key === "ArrowRight") goTo(current + 1);
-        });
+        clearAll.addEventListener('click', function () { picks = []; paint(); });
 
         if (destinations.length < 2) {
-          hideControls();
+            hideControls();
         } else {
-          counter.textContent = "1 / " + destinations.length;
+            counter.textContent = '1 / ' + destinations.length;
         }
-      })();
+
+        // Restore the ranking made earlier in this browser session
+        var saved = readPicks();
+        if (saved && Array.isArray(saved.picks)) {
+            saved.picks
+                .slice()
+                .sort(function (a, b) { return a.rank - b.rank; })
+                .forEach(function (entry) {
+                    var found = -1;
+                    for (var i = 0; i < destinations.length; i++) {
+                        if (destinations[i].name === entry.name) { found = i; break; }
+                    }
+                    if (found === -1 && typeof entry.index === 'number' && destinations[entry.index]) {
+                        found = entry.index;
+                    }
+                    if (found !== -1 && picks.indexOf(found) === -1) picks.push(found);
+                });
+            if (picks.length) goTo(picks[0]);
+        }
+        paint();
+
+        if (!COOKIES_OK) {
+            note.textContent = 'Note: the browser is blocking cookies on this page (usual when opening the ' +
+                               'file directly from disk), so your ranking is being kept in session storage instead. ' +
+                               'Serve the pages over http:// to use real cookies.';
+            note.style.display = 'block';
+        }
+    })();
     </script>
-  </body>
+</body>
 </html>
