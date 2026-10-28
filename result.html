@@ -27,8 +27,9 @@
       <p id="Slogen">Find your Ideal Destination</p>
     </div>
 
+    
     <!-- Main content area: result title and destination recommendation section -->
-    <div class="container text-center">
+    <div id="result-container" class="container text-center">
       <h2 id="ideal-destinations">Your Ideal Destinations</h2>
       <p id="based-on">
         Based on your preferences, here are three destinations that match your
@@ -71,10 +72,12 @@
             Use the arrows, the dots, or your keyboard's left/right keys.
           </p>
         </div>
-      </div>
+      
 
       <!-- Action buttons: return to the quiz or home page -->
+      <a id="plan-trip" href="TravelPlan.html"> Lets plan your trip </a>
       <div class="result-actions">
+      
         <a
           href="question.html"
           class="btn btn-primary"
@@ -89,6 +92,11 @@
         >
       </div>
     </div>
+  </div>
+  <footer class="text-center" id="footer">
+      <p>Need inspiration? Explore popular Journeys!</p>
+      <a href="index.html"> Back to Home</a>
+    </footer>
 
     <!-- Script section: handles recommendation payload loading and carousel behavior -->
     <script>

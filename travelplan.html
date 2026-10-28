@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Plan</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        rel="stylesheet"
+        href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+</head>
+<body>
+    <div class="container-fluid text-left">
+    <a
+        class="title"
+        href="index.html"
+        ><h1>JourneyMatch</h1></a>
+    <p id="Slogen">Find your Ideal Destination</p>
+    </div>
+    <div id="container" class="container">
+        <div id="formContainer" class="container">
+            <form class="form-horizontal" id="travelForm">
+                <div class="form-group">
+                    <label for="price-range" class="col-sm-2 control-label">Price Range:</label>
+                    <div class="col-sm-10">
+                        <input type="range" class="form-control" id="price-range" min="150" max="10000" step="50" value="150">
+                        <span id="budgetValue">$150</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="date" class="col-sm-2 control-label">Date:</label>
+                    <div class="col-sm-10">
+                        <input type="date" class="form-control" id="date" placeholder="Enter date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="duration" class="col-sm-2 control-label">Duration (days):</label>
+                    <div class="col-sm-10">
+                        <input type="number" class="form-control" id="duration" placeholder="Enter duration in days">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="Airline" class="col-sm-2 control-label">Preferred Airline:</label>
+                    <div class="col-sm-10">
+                        <input type="text" class="form-control" id="Airline" placeholder="Enter preferred airline">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="Hotel" class="col-sm-2 control-label">Preferred Hotel:</label>
+                    <div class="col-sm-10">
+                        <select class="form-control" id="Hotel">
+                            <option value="">Select a hotel</option>
+                            <option value="hotel1">Hotel 1</option>
+                            <option value="hotel2">Hotel 2</option>
+                            <option value="hotel3">Hotel 3</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form=group">
+                    <label for="popularity" class="col-sm-2 control-label">Popularity:</label>
+                    <div class="col-sm-10">
+                        <select class="form-control" id="popularity">
+                            <option value="">Select popularity</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </div>        
+
+            </form>
+        </div>
+        <div id="resultContainer" class="container">
+            <ol class="list-group" id="resultList">
+                <li class="list-group-item">No results found.</li>
+                <li class="list-group-item">Please try again with different criteria.</li>
+                <li class="list-group-item">You can also explore popular Journeys on the home page.</li>
+            </ol>
+        </div>
+    </div>
+    <footer class="text-center"
+    id="footer"
+    style="margin-top: 20px">
+        <p>Need inspiration? Explore popular Journeys!</p>
+        <a href="index.html"> Back to Home</a>   
+    </footer>
+</body> 

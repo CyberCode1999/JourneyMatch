@@ -9,7 +9,7 @@ html, body {
 body {
     font-family: 'Raleway', sans-serif;
     margin: 0;
-    background-color: #f2f2f2;
+    background-color: #ffffff;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -127,7 +127,7 @@ a.title h1 {
 	margin-bottom: 50px;
 	position: relative;
 	display: block;
-	background: #edf6fb;
+	background: #ffffff;
 	border: none;
 	border-radius: 12px;
 	padding: 20px 18px 18px;
@@ -189,9 +189,36 @@ a.title h1 {
 }
 
 /* Result page carousel styling to match the app theme */
+#result-container {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-top: 3%;
+
+}
+
+#plan-trip {
+    display: inline-block;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 16px 34px;
+    min-width: 360px;
+    width: 900px;
+    max-width: 90%;
+    font-family: 'Tienne', serif;
+    font-size: 2.3rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    background-color: #153243;
+    border: 2px solid rgba(0, 0, 0, 0.75);
+    border-radius: 999px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
 #carousel {
     position: relative;
-    background: #edf6fb;
+    background: #ffffff;
     border: none;
     border-radius: 12px;
     margin-top: 25px;
@@ -398,13 +425,20 @@ a.title h1 {
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+#plan-trip:hover,
+#plan-trip:focus {
+    background-color: #0f2a36;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+}
 #back-to-question:hover,
 #back-to-question:focus,
 #back-to-question:active,
 #back-to-home:hover,
 #back-to-home:focus,
 #back-to-home:active {
-    background-color: #6d95a9;
+    background-color: #d9eef7;
     color: #000;
     transform: translateY(-1px);
     box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
@@ -580,7 +614,7 @@ a.title h1 {
 	margin-bottom: 50px;
 	position: relative;
 	display: block;
-	background: #edf6fb;
+	background: #ffffff;
 	border: none;
 	border-radius: 12px;
 	padding: 20px 18px 18px;
