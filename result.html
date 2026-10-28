@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+  <!-- Head section: page metadata, page title, and linked stylesheets -->
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -13,7 +14,10 @@
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
   </head>
+
+  <!-- Body section: everything visible on the results page -->
   <body>
+    <!-- Header bar: logo/title and slogan at the top of the page -->
     <div class="container-fluid text-left">
       <a
         class="title"
@@ -23,6 +27,7 @@
       <p id="Slogen">Find your Ideal Destination</p>
     </div>
 
+    <!-- Main content area: result title and destination recommendation section -->
     <div class="container text-center">
       <h2 id="ideal-destinations">Your Ideal Destinations</h2>
       <p id="based-on">
@@ -30,6 +35,7 @@
         criteria:
       </p>
 
+      <!-- Recommendation carousel: displays destination slides, navigation arrows, and dots -->
       <div class="row result-row">
         <div class="col-md-8 col-md-offset-2">
           <div id="carousel">
@@ -39,6 +45,7 @@
                 <p class="message">Loading your recommendations...</p>
               </div>
             </div>
+            <!-- Previous slide button -->
             <button
               id="prevBtn"
               class="nav-arrow"
@@ -46,6 +53,7 @@
               aria-label="Previous">
               &#8249;
             </button>
+            <!-- Next slide button -->
             <button
               id="nextBtn"
               class="nav-arrow"
@@ -53,8 +61,10 @@
               aria-label="Next">
               &#8250;
             </button>
+            <!-- Dot navigation for each destination -->
             <ul id="dots"></ul>
           </div>
+          <!-- Hint text below the carousel -->
           <p
             class="text-muted"
             style="margin-top: 8px; font-size: 12px">
@@ -63,6 +73,7 @@
         </div>
       </div>
 
+      <!-- Action buttons: return to the quiz or home page -->
       <div class="result-actions">
         <a
           href="question.html"
@@ -79,8 +90,10 @@
       </div>
     </div>
 
+    <!-- Script section: handles recommendation payload loading and carousel behavior -->
     <script>
       (function () {
+        // DOM references for the carousel and controls
         var slidesBox = document.getElementById("slides");
         var dotsBox = document.getElementById("dots");
         var prevBtn = document.getElementById("prevBtn");
@@ -104,7 +117,7 @@
           return new TextDecoder().decode(bytes);
         }
 
-        // ---- 1. Find the data: URL hash first, then storage --------------------
+        // Load recommendation data from the URL hash or browser storage
         function loadPayload() {
           var hash = window.location.hash ? window.location.hash.slice(1) : "";
 
@@ -172,7 +185,7 @@
           return null;
         }
 
-        // ---- 2. Turn plain text into slides if the server couldn't parse JSON ---
+        // Convert plain text responses into destination slide objects if needed
         function slicePlainText(text) {
           return text
             .split(/\n\s*\n/)
@@ -191,13 +204,15 @@
             });
         }
 
+        // Create an HTML element with optional class and text content
         function el(tag, className, text) {
           var node = document.createElement(tag);
           if (className) node.className = className;
-          if (text) node.textContent = text; // textContent = safe, no HTML injection
+          if (text) node.textContent = text;
           return node;
         }
 
+        // Hide the carousel controls when there are no slides to navigate
         function hideControls() {
           prevBtn.style.display = "none";
           nextBtn.style.display = "none";
@@ -206,6 +221,7 @@
           if (hint) hint.style.display = "none";
         }
 
+        // Display a message inside the slide area when no valid results are found
         function showMessage(msg) {
           slidesBox.innerHTML = "";
           var slide = el("div", "slide active");
@@ -214,11 +230,12 @@
           hideControls();
         }
 
+        // Switch the active slide and update the pagination indicator
         function goTo(index) {
           var slides = slidesBox.querySelectorAll(".slide");
           var dots = dotsBox.querySelectorAll("li");
           if (!slides.length) return;
-          current = (index + slides.length) % slides.length; // wraps around
+          current = (index + slides.length) % slides.length;
           for (var i = 0; i < slides.length; i++) {
             slides[i].classList.toggle("active", i === current);
             if (dots[i]) dots[i].classList.toggle("active", i === current);
@@ -226,7 +243,7 @@
           counter.textContent = current + 1 + " / " + slides.length;
         }
 
-        // ---- 3. Render ---------------------------------------------------------
+        // Render the destination results and attach navigation events
         var payload = loadPayload();
 
         if (!payload) {

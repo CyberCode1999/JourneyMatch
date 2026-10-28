@@ -10,6 +10,9 @@ body {
     font-family: 'Raleway', sans-serif;
     margin: 0;
     background-color: #f2f2f2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Center button row (Bootstrap 3 compatibility) */
@@ -92,9 +95,26 @@ a.title h1 {
 }
 
 /* Footer styling to match the turquoise header */
+
+#footer p{
+    
+    margin: 0;
+    font-family: 'Tienne', serif;
+    font-size: 2.1rem;
+    color: #000;
+}
+#footer a{
+    display: inline-block;
+    margin-top: 8px;
+    font-family: 'Tienne', serif;
+    font-size: 1.5rem;
+    color: #000;
+    text-decoration: none;
+}  
 #footer {
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
+    width: 100%;
+    position:fixed;
+    bottom: 0;
     margin-top: auto;
     background-color: #78E0DC;
     padding: 18px 0;
@@ -119,7 +139,11 @@ a.title h1 {
 	margin-bottom: 30px;
 }
 
-p{
+#journey-text {
+    font-family: 'Tienne', serif;
+    font-size: 2.5rem;
+    line-height: 1.5;
+    color: #000;
 	margin-top: 30px;
 	margin-bottom: 30px;
 }
@@ -127,37 +151,41 @@ p{
 /* About section heading styling */
 #about {
 	margin-top: 20px;
-	margin-bottom: 20px;
-	font-family: 'Tienne', serif;
+	font-family: 'Italianno',
+        cursive;
+    color: #000;
+    font-size: 5.5rem;
 }
 
+#about-text {
+    font-family: 'Tienne', serif;
+    font-size: 2.1rem;
+    line-height: 1.5;
+    color: #000;
+}
 /* Main CTA button styling */
 #button {
     margin-top: 20px;
     margin-bottom: 20px;
     padding: 16px 34px;
     min-width: 360px;
-    width: 620px;
+    width: 900px;
     max-width: 90%;
     font-family: 'Tienne', serif;
     font-size: 2.3rem;
     font-weight: 700;
     letter-spacing: 0.03em;
-    background-color: #7AA3B8;
+    background-color: #153243;
     border: 2px solid rgba(0, 0, 0, 0.75);
-    border-radius: 10px;
+    border-radius: 999px;
     box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
-    color: #000000;
+    color: #ffffff;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-#button:hover,
-#button:focus,
-#button:active {
-    background-color: #6d95a9;
-    color: #000;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+#button.btn,
+#button.btn-primary {
+    border-radius: 999px;
 }
 
 /* Result page carousel styling to match the app theme */
@@ -398,51 +426,54 @@ p{
 
 /* Form styling */
 #recommendForm {
-	width: 80%;
-	max-width: 900px;
-	margin: 50px auto;
-	padding: 50px 50px;
+	width: 100%;
+	max-width: 1300px;
 	min-height: 400px;
-	font-family: 'Tienne', serif;
-	font-size: 1.5rem;
-	font-weight: 700;
-	letter-spacing: 0.03em;
-	background-color: #7AA3B8;
-	border-radius: 10px;
-	border: 2px solid #000;
+	margin: 50px auto;
+	border-radius: 20px;
+	padding: 150px 50px 100px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
+		0 6px 20px 0 rgba(0, 0, 0, 0.19);
 	box-sizing: border-box;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
 }
 
 #question-page {
+	flex: 1;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 30px 0 10px;
+	padding: 30px 20px 10px;
 	box-sizing: border-box;
+	width: 100%;
+	min-height: 420px;
 }
 
 #form {
 	text-align: center;
-	max-width: 90%;
-	margin-left: auto;
-	margin-right: auto;
 	width: 100%;
+	margin: 0 auto;
+    padding-bottom: 5%;
+}
+
+.form-group {
+	margin: 15px;
 }
 
 #question {
+	display: block;
+	width: 100%;
 	margin-bottom: 20px;
 	font-family: 'Tienne', serif;
 	font-size: 20px;
 	font-weight: 700;
 	letter-spacing: 0.03em;
-	padding-bottom: 30px;
+	padding-bottom: 20px;
+	text-align: center;
 }
 
 #inputQuestion {
 	width: 100%;
+	max-width: 100%;
 	padding: 10px;
 	font-size: 16px;
 	border: 1px solid #ccc;
@@ -457,11 +488,12 @@ p{
 	font-size: 16px;
 	background-color: #153243;
 	border: none;
-	border-radius: 4px;
+	border-radius: 999px;
 	font-family: 'Tienne', serif;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
 	color: #fff;
+	min-width: 150px;
 }
 
 #submitBtn:hover,
@@ -469,10 +501,19 @@ p{
 	background-color: #0f2a36;
 }
 
+#status-wrapper {
+	display: flex;
+	justify-content: center;
+	width: 100%;
+	min-height: 70px;
+	margin-top: 20px;
+}
+
 #status {
 	display: none;
 	width: min(900px, calc(100% - 40px));
 	max-width: 900px;
+	min-height: 54px;
 	margin: 0;
 	padding: 18px 18px;
 	border-radius: 10px;
@@ -486,13 +527,6 @@ p{
 	box-sizing: border-box;
 	text-align: center;
 	box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
-}
-
-#status-wrapper {
-	display: flex;
-	justify-content: center;
-	width: 100%;
-	margin-top: 20px;
 }
 
 #status.alert-info {
