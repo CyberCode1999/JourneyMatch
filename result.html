@@ -1,270 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Head section: page metadata, page title, and linked stylesheets -->
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
     <title>JourneyMatch - Result</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <style>
-        /* --- centring -------------------------------------------------------
-           style.css stretches every .row to 100vw with negative side margins,
-           which pushed this column off to the right. These rules opt the
-           result row out of that and keep the panel centred on the page.      */
-        .result-row {
-            width: auto;
-            max-width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-            display: flex;
-            justify-content: center;
-        }
-        .result-row > [class*="col-"] {
-            float: none;
-            width: 100%;
-            max-width: 900px;
-            margin-left: auto;
-            margin-right: auto;
-            padding-left: 15px;
-            padding-right: 15px;
-        }
+    <link
+      rel="stylesheet"
+      href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" />
+  </head>
 
-        /* Self-contained carousel: no jQuery, no Bootstrap JS required */
-        #carousel {
-            position: relative;
-            background: #f7f7f7;
-            border: 1px solid #e3e3e3;
-            border-radius: 6px;
-            margin-top: 25px;
-            text-align: left;
-            overflow: hidden;
-        }
-        .slide {
-            display: none;
-            min-height: 270px;
-            padding: 32px 70px 70px;
-            cursor: pointer;                 /* the whole slide is clickable */
-        }
-        .slide.active {
-            display: block;
-            animation: fade 0.35s ease;
-        }
-        @keyframes fade {
-            from { opacity: 0; transform: translateX(12px); }
-            to   { opacity: 1; transform: translateX(0); }
-        }
-        .slide .num {
-            display: inline-block;
-            width: 34px; height: 34px; line-height: 34px;
-            text-align: center;
-            border-radius: 50%;
-            background: #337ab7;
-            color: #fff;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .slide h3 { margin: 6px 0 2px; }
-        .slide .country { color: #777; font-style: italic; margin-bottom: 14px; }
-        .slide .description { font-size: 16px; white-space: pre-wrap; margin: 0; }
-        .slide .why {
-            margin: 14px 0 0;
-            padding-left: 12px;
-            border-left: 3px solid #c7ddf0;
-            color: #555;
-        }
-
-        /* --- ranked selection ---------------------------------------------- */
-        .slide.picked {
-            background: #f1f9f1;
-            box-shadow: inset 4px 0 0 #5cb85c;
-        }
-        .slide.picked .num { background: #5cb85c; }
-        .slide .pick-btn {
-            margin-top: 18px;
-            pointer-events: none;            /* clicks handled by the slide */
-        }
-        .rank-flag {
-            display: none;
-            margin-left: 10px;
-            padding: 3px 10px;
-            border-radius: 10px;
-            background: #5cb85c;
-            color: #fff;
-            font-size: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            vertical-align: middle;
-        }
-        .slide.picked .rank-flag { display: inline-block; }
-
-        .nav-arrow {
-            position: absolute;
-            top: 45%;
-            transform: translateY(-50%);
-            border: none;
-            background: transparent;
-            color: #337ab7;
-            font-size: 34px;
-            line-height: 1;
-            padding: 8px 16px;
-            cursor: pointer;
-            opacity: 0.55;
-        }
-        .nav-arrow:hover { opacity: 1; }
-        .nav-arrow:focus { outline: none; }
-        #prevBtn { left: 2px; }
-        #nextBtn { right: 2px; }
-
-        #counter {
-            position: absolute;
-            top: 14px; right: 22px;
-            font-size: 12px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: #999;
-        }
-        #dots {
-            position: absolute;
-            bottom: 16px; left: 0; right: 0;
-            text-align: center;
-            margin: 0; padding: 0;
-            list-style: none;
-        }
-        #dots li {
-            display: inline-block;
-            width: 11px; height: 11px;
-            margin: 0 4px;
-            border: 1px solid #999;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        #dots li.active { background: #337ab7; border-color: #337ab7; }
-        #dots li.picked { background: #5cb85c; border-color: #5cb85c; }
-
-        /* --- the ranked shortlist ------------------------------------------ */
-        #shortlist-box {
-            display: none;
-            margin-top: 20px;
-            border: 1px solid #d6e9c6;
-            border-radius: 6px;
-            background: #f1f9f1;
-            padding: 16px 18px;
-            text-align: left;
-        }
-        #shortlist-box h4 { margin: 0 0 12px; }
-        #shortlist { list-style: none; margin: 0; padding: 0; }
-        #shortlist li {
-            padding: 8px 6px;
-            border-top: 1px solid #dceccd;
-        }
-        #shortlist li:first-child { border-top: none; }
-        #shortlist .pos {
-            display: inline-block;
-            width: 26px; height: 26px; line-height: 26px;
-            margin-right: 10px;
-            text-align: center;
-            border-radius: 50%;
-            background: #5cb85c;
-            color: #fff;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        #shortlist .where { font-weight: bold; }
-        #shortlist .controls { float: right; }
-        #shortlist .controls button {
-            border: 1px solid #c5dfb3;
-            background: #fff;
-            color: #3c763d;
-            border-radius: 3px;
-            width: 28px; height: 26px;
-            line-height: 1;
-            margin-left: 4px;
-            cursor: pointer;
-        }
-        #shortlist .controls button:disabled { opacity: 0.3; cursor: default; }
-        #shortlist .controls .remove { color: #a94442; border-color: #e0b4b4; }
-
-        .message { padding: 30px; white-space: pre-wrap; }
-        #cookie-note { display: none; font-size: 12px; margin-top: 8px; }
-    </style>
-</head>
-<body>
+  <!-- Body section: everything visible on the results page -->
+  <body>
+    <!-- Header bar: logo/title and slogan at the top of the page -->
     <div class="container-fluid text-left">
         <a class="title" href="index.html"><h1>JourneyMatch</h1></a>
         <p>Find your Ideal Destination</p>
     </div>
 
-    <div class="container text-center">
-        <h2 id="ideal-destinations">Your Ideal Destinations</h2>
-        <p id="based-on">Based on your preferences, here are three destinations that match your criteria:</p>
+    
+    <!-- Main content area: result title and destination recommendation section -->
+    <div id="result-container" class="container text-center">
+      <h2 id="ideal-destinations">Your Ideal Destinations</h2>
+      <p id="based-on">
+        Based on your preferences, here are three destinations that match your
+        criteria:
+      </p>
 
-        <!-- result-row opts out of the 100vw .row rule in style.css -->
-        <div class="row result-row">
-            <div class="col-md-8">
-                <div id="carousel">
-                    <span id="counter"></span>
-                    <div id="slides">
-                        <div class="slide active"><p class="message">Loading your recommendations...</p></div>
-                    </div>
-                    <button id="prevBtn" class="nav-arrow" type="button" aria-label="Previous">&#8249;</button>
-                    <button id="nextBtn" class="nav-arrow" type="button" aria-label="Next">&#8250;</button>
-                    <ul id="dots"></ul>
-                </div>
-
-                <p class="text-muted" id="hint" style="margin-top:8px; font-size:12px;">
-                    Arrows, dots or left/right keys to browse &middot;
-                    click destinations in the order you prefer them
-                </p>
-
-                <div id="shortlist-box">
-                    <button type="button" class="close" id="clearAll" aria-label="Clear all">&times;</button>
-                    <h4>Your preferences, most wanted first</h4>
-                    <ul id="shortlist"></ul>
-                </div>
-
-                <p class="text-muted" id="cookie-note"></p>
+      <!-- Recommendation carousel: displays destination slides, navigation arrows, and dots -->
+      <div class="row result-row">
+        <div class="col-md-8 col-md-offset-2">
+          <div id="carousel">
+            <span id="counter"></span>
+            <div id="slides">
+              <div class="slide active">
+                <p class="message">Loading your recommendations...</p>
+              </div>
             </div>
+            <!-- Previous slide button -->
+            <button
+              id="prevBtn"
+              class="nav-arrow"
+              type="button"
+              aria-label="Previous">
+              &#8249;
+            </button>
+            <!-- Next slide button -->
+            <button
+              id="nextBtn"
+              class="nav-arrow"
+              type="button"
+              aria-label="Next">
+              &#8250;
+            </button>
+            <!-- Dot navigation for each destination -->
+            <ul id="dots"></ul>
+          </div>
+          <!-- Hint text below the carousel -->
+          <p
+            class="text-muted"
+            style="margin-top: 8px; font-size: 12px">
+            Use the arrows, the dots, or your keyboard's left/right keys.
+          </p>
         </div>
+      
 
-        <div class="result-actions">
-            <a href="question.html" id="back-to-question" class="btn">Take the Quiz Again</a>
-            <a href="index.html" id="back-to-home" class="btn">Home</a>
-        </div>
+      <!-- Action buttons: return to the quiz or home page -->
+      <a id="plan-trip" href="TravelPlan.html"> Lets plan your trip </a>
+      <div class="result-actions">
+      
+        <a
+          href="question.html"
+          class="btn btn-primary"
+          id="back-to-question"
+          >Take the Quiz Again</a
+        >
+        <a
+          href="index.html"
+          class="btn btn-default"
+          id="back-to-home"
+          >Back to Home</a
+        >
+      </div>
     </div>
+  </div>
+  <footer class="text-center" id="footer">
+      <p>Need inspiration? Explore popular Journeys!</p>
+      <a href="index.html"> Back to Home</a>
+    </footer>
 
+    <!-- Script section: handles recommendation payload loading and carousel behavior -->
     <script>
-    (function () {
-        var slidesBox = document.getElementById('slides');
-        var dotsBox   = document.getElementById('dots');
-        var prevBtn   = document.getElementById('prevBtn');
-        var nextBtn   = document.getElementById('nextBtn');
-        var counter   = document.getElementById('counter');
-        var listBox   = document.getElementById('shortlist-box');
-        var listEl    = document.getElementById('shortlist');
-        var clearAll  = document.getElementById('clearAll');
-        var hint      = document.getElementById('hint');
-        var note      = document.getElementById('cookie-note');
-
-        var COOKIE = 'jm_preferences';
+      (function () {
+        // DOM references for the carousel and controls
+        var slidesBox = document.getElementById("slides");
+        var dotsBox = document.getElementById("dots");
+        var prevBtn = document.getElementById("prevBtn");
+        var nextBtn = document.getElementById("nextBtn");
+        var counter = document.getElementById("counter");
+        var hint = document.querySelector(".text-muted");
         var current = 0;
         var picks = [];            // destination indexes, best first
         var destinations = [];
         var questionText = '';
         var lastError = '';
 
-        /* ================= cookie helpers =================================
-           No "expires"/"max-age" => a SESSION cookie: it lives until the
-           browser is closed.                                                */
-        function setSessionCookie(name, value) {
-            document.cookie = name + '=' + encodeURIComponent(value) + '; path=/; SameSite=Lax';
+        // UTF-8 safe base64url decoding
+        function fromBase64Url(str) {
+          var b64 = str.replace(/-/g, "+").replace(/_/g, "/");
+          while (b64.length % 4) {
+            b64 += "=";
+          }
+          var binary = atob(b64);
+          var bytes = new Uint8Array(binary.length);
+          for (var i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return new TextDecoder().decode(bytes);
         }
-        function getCookie(name) {
-            var parts = document.cookie ? document.cookie.split('; ') : [];
-            for (var i = 0; i < parts.length; i++) {
-                var eq = parts[i].indexOf('=');
-                if (parts[i].slice(0, eq) === name) {
-                    return decodeURIComponent(parts[i].slice(eq + 1));
-                }
+
+        // Load recommendation data from the URL hash or browser storage
+        function loadPayload() {
+          var hash = window.location.hash ? window.location.hash.slice(1) : "";
+
+          if (hash) {
+            var attempts = [];
+            if (hash.indexOf("b64.") === 0) {
+              attempts.push(function () {
+                return fromBase64Url(hash.slice(4));
+              });
             }
             return '';
         }
@@ -361,6 +230,7 @@
             return null;
         }
 
+        // Convert plain text responses into destination slide objects if needed
         function slicePlainText(text) {
             return text.split(/\n\s*\n/)
                 .map(function (c) { return c.trim(); })
@@ -376,14 +246,15 @@
                 });
         }
 
-        /* ================= rendering ====================================== */
+        // Create an HTML element with optional class and text content
         function el(tag, className, text) {
-            var node = document.createElement(tag);
-            if (className) node.className = className;
-            if (text) node.textContent = text;   // textContent = safe, no HTML injection
-            return node;
+          var node = document.createElement(tag);
+          if (className) node.className = className;
+          if (text) node.textContent = text;
+          return node;
         }
 
+        // Hide the carousel controls when there are no slides to navigate
         function hideControls() {
             prevBtn.style.display = 'none';
             nextBtn.style.display = 'none';
@@ -392,6 +263,7 @@
             if (hint) hint.style.display = 'none';
         }
 
+        // Display a message inside the slide area when no valid results are found
         function showMessage(msg) {
             slidesBox.innerHTML = '';
             var slide = el('div', 'slide active');
@@ -401,109 +273,20 @@
             hideControls();
         }
 
+        // Switch the active slide and update the pagination indicator
         function goTo(index) {
-            var slides = slidesBox.querySelectorAll('.slide');
-            var dots   = dotsBox.querySelectorAll('li');
-            if (!slides.length) return;
-            current = (index + slides.length) % slides.length;   // wraps around
-            for (var i = 0; i < slides.length; i++) {
-                slides[i].classList.toggle('active', i === current);
-                if (dots[i]) dots[i].classList.toggle('active', i === current);
-            }
-            counter.textContent = (current + 1) + ' / ' + slides.length;
+          var slides = slidesBox.querySelectorAll(".slide");
+          var dots = dotsBox.querySelectorAll("li");
+          if (!slides.length) return;
+          current = (index + slides.length) % slides.length;
+          for (var i = 0; i < slides.length; i++) {
+            slides[i].classList.toggle("active", i === current);
+            if (dots[i]) dots[i].classList.toggle("active", i === current);
+          }
+          counter.textContent = current + 1 + " / " + slides.length;
         }
 
-        function ordinal(n) {
-            var suffix = (n % 100 >= 11 && n % 100 <= 13) ? 'th'
-                       : ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
-            return n + suffix;
-        }
-
-        /* --- paint slides + shortlist from `picks` -------------------------- */
-        function paint() {
-            var slides = slidesBox.querySelectorAll('.slide');
-            var dots   = dotsBox.querySelectorAll('li');
-
-            for (var i = 0; i < slides.length; i++) {
-                var position = picks.indexOf(i);           // -1 when not picked
-                var isPicked = position !== -1;
-
-                slides[i].classList.toggle('picked', isPicked);
-                if (dots[i]) dots[i].classList.toggle('picked', isPicked);
-
-                var flag = slides[i].querySelector('.rank-flag');
-                if (flag) flag.textContent = ordinal(position + 1) + ' choice';
-
-                var btn = slides[i].querySelector('.pick-btn');
-                if (btn) {
-                    btn.className = 'btn pick-btn ' + (isPicked ? 'btn-success' : 'btn-default');
-                    btn.textContent = isPicked
-                        ? '✓ ' + ordinal(position + 1) + ' choice — click to remove'
-                        : (picks.length ? 'Add as ' + ordinal(picks.length + 1) + ' choice'
-                                        : 'Pick this as your first choice');
-                }
-            }
-
-            // the ranked shortlist underneath
-            listEl.innerHTML = '';
-            picks.forEach(function (destIndex, position) {
-                var dest = destinations[destIndex] || {};
-                var row = document.createElement('li');
-
-                var controls = el('span', 'controls');
-
-                var up = el('button', null, '▲');
-                up.type = 'button';
-                up.title = 'Move up';
-                up.disabled = position === 0;
-                up.addEventListener('click', function () { move(position, -1); });
-
-                var down = el('button', null, '▼');
-                down.type = 'button';
-                down.title = 'Move down';
-                down.disabled = position === picks.length - 1;
-                down.addEventListener('click', function () { move(position, 1); });
-
-                var rm = el('button', 'remove', '×');
-                rm.type = 'button';
-                rm.title = 'Remove';
-                rm.addEventListener('click', function () { toggle(destIndex); });
-
-                controls.appendChild(up);
-                controls.appendChild(down);
-                controls.appendChild(rm);
-                row.appendChild(controls);
-
-                row.appendChild(el('span', 'pos', String(position + 1)));
-                row.appendChild(el('span', 'where', dest.name || 'Destination ' + (destIndex + 1)));
-                if (dest.country) row.appendChild(el('span', null, ', ' + dest.country));
-
-                listEl.appendChild(row);
-            });
-
-            listBox.style.display = picks.length ? 'block' : 'none';
-            savePicks();
-        }
-
-        function toggle(destIndex) {
-            var position = picks.indexOf(destIndex);
-            if (position === -1) {
-                picks.push(destIndex);          // click order = preference order
-            } else {
-                picks.splice(position, 1);      // clicking again removes it
-            }
-            paint();
-        }
-
-        function move(position, delta) {
-            var target = position + delta;
-            if (target < 0 || target >= picks.length) return;
-            var moved = picks.splice(position, 1)[0];
-            picks.splice(target, 0, moved);
-            paint();
-        }
-
-        /* ================= boot =========================================== */
+        // Render the destination results and attach navigation events
         var payload = loadPayload();
 
         if (!payload) {
