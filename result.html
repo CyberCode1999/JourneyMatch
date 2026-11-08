@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <!-- Head section: page metadata, page title, and linked stylesheets -->
   <head>
@@ -19,12 +19,8 @@
   <body>
     <!-- Header bar: logo/title and slogan at the top of the page -->
     <div class="container-fluid text-left">
-      <a
-        class="title"
-        href="index.html"
-        ><h1>JourneyMatch</h1></a
-      >
-      <p id="Slogen">Find your Ideal Destination</p>
+        <a class="title" href="index.html"><h1>JourneyMatch</h1></a>
+        <p>Find your Ideal Destination</p>
     </div>
 
     
@@ -109,7 +105,10 @@
         var counter = document.getElementById("counter");
         var hint = document.querySelector(".text-muted");
         var current = 0;
-        var lastError = "";
+        var picks = [];            // destination indexes, best first
+        var destinations = [];
+        var questionText = '';
+        var lastError = '';
 
         // UTF-8 safe base64url decoding
         function fromBase64Url(str) {
@@ -136,80 +135,115 @@
                 return fromBase64Url(hash.slice(4));
               });
             }
-            attempts.push(function () {
-              return fromBase64Url(hash);
-            });
-            attempts.push(function () {
-              return decodeURIComponent(hash);
-            });
-            attempts.push(function () {
-              return hash;
-            });
+            return '';
+        }
+        function deleteCookie(name) {
+            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        }
+        // Chrome ignores document.cookie on file:// — detect it and fall back
+        function cookiesWork() {
+            try {
+                document.cookie = 'jm_test=1; path=/; SameSite=Lax';
+                var ok = document.cookie.indexOf('jm_test=1') !== -1;
+                deleteCookie('jm_test');
+                return ok;
+            } catch (e) { return false; }
+        }
+        var COOKIES_OK = cookiesWork();
 
-            for (var a = 0; a < attempts.length; a++) {
-              try {
-                var parsed = JSON.parse(attempts[a]());
-                if (parsed && typeof parsed === "object") return parsed;
-              } catch (e) {
-                lastError = e.name + ": " + e.message;
-              }
+        function savePicks() {
+            if (!picks.length) {
+                deleteCookie(COOKIE);
+                try { sessionStorage.removeItem(COOKIE); } catch (e) {}
+                return;
             }
-            console.warn("Could not decode URL hash. Last error:", lastError);
-          }
-
-          var stores = [];
-          try {
-            stores.push(sessionStorage.getItem("journeyPayload"));
-          } catch (e) {}
-          try {
-            stores.push(localStorage.getItem("journeyPayload"));
-          } catch (e) {}
-          for (var i = 0; i < stores.length; i++) {
-            if (stores[i]) {
-              try {
-                return JSON.parse(stores[i]);
-              } catch (e) {}
+            // Ranked list, position 1 = most wanted. Kept compact: cookies cap at ~4KB.
+            var ranked = picks.map(function (destIndex, position) {
+                var d = destinations[destIndex] || {};
+                return {
+                    rank: position + 1,
+                    name: d.name || '',
+                    country: d.country || '',
+                    index: destIndex
+                };
+            });
+            var json = JSON.stringify({ question: questionText, picks: ranked, at: new Date().toISOString() });
+            if (COOKIES_OK) {
+                setSessionCookie(COOKIE, json);
+            } else {
+                try { sessionStorage.setItem(COOKIE, json); } catch (e) {}
             }
-          }
+        }
+        function readPicks() {
+            var raw = COOKIES_OK ? getCookie(COOKIE) : '';
+            if (!raw) { try { raw = sessionStorage.getItem(COOKIE) || ''; } catch (e) {} }
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch (e) { return null; }
+        }
 
-          // Legacy keys from the earlier version
-          try {
-            var legacy = localStorage.getItem("journeyResult");
-            if (legacy) {
-              var legacyDest = [];
-              try {
-                legacyDest = JSON.parse(
-                  localStorage.getItem("journeyDestinations") || "[]",
-                );
-              } catch (e) {}
-              return {
-                question: localStorage.getItem("journeyQuestion") || "",
-                destinations: legacyDest,
-                raw: legacy,
-              };
+        /* ================= payload decoding =============================== */
+        function fromBase64Url(str) {
+            var b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (b64.length % 4) { b64 += '='; }
+            var binary = atob(b64);
+            var bytes = new Uint8Array(binary.length);
+            for (var i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+            return new TextDecoder().decode(bytes);
+        }
+
+        function loadPayload() {
+            var hash = window.location.hash ? window.location.hash.slice(1) : '';
+            if (hash) {
+                var attempts = [];
+                if (hash.indexOf('b64.') === 0) {
+                    attempts.push(function () { return fromBase64Url(hash.slice(4)); });
+                }
+                attempts.push(function () { return fromBase64Url(hash); });
+                attempts.push(function () { return decodeURIComponent(hash); });
+                attempts.push(function () { return hash; });
+                for (var a = 0; a < attempts.length; a++) {
+                    try {
+                        var parsed = JSON.parse(attempts[a]());
+                        if (parsed && typeof parsed === 'object') return parsed;
+                    } catch (e) { lastError = e.name + ': ' + e.message; }
+                }
+                console.warn('Could not decode URL hash. Last error:', lastError);
             }
-          } catch (e) {}
-
-          return null;
+            var stores = [];
+            try { stores.push(sessionStorage.getItem('journeyPayload')); } catch (e) {}
+            try { stores.push(localStorage.getItem('journeyPayload')); } catch (e) {}
+            for (var i = 0; i < stores.length; i++) {
+                if (stores[i]) { try { return JSON.parse(stores[i]); } catch (e) {} }
+            }
+            try {
+                var legacy = localStorage.getItem('journeyResult');
+                if (legacy) {
+                    var legacyDest = [];
+                    try { legacyDest = JSON.parse(localStorage.getItem('journeyDestinations') || '[]'); } catch (e) {}
+                    return {
+                        question: localStorage.getItem('journeyQuestion') || '',
+                        destinations: legacyDest,
+                        raw: legacy
+                    };
+                }
+            } catch (e) {}
+            return null;
         }
 
         // Convert plain text responses into destination slide objects if needed
         function slicePlainText(text) {
-          return text
-            .split(/\n\s*\n/)
-            .map(function (c) {
-              return c.trim();
-            })
-            .filter(Boolean)
-            .map(function (chunk) {
-              var lines = chunk.split("\n");
-              return {
-                name: lines[0].replace(/^[\s*#\-\d.)]+/, "").trim(),
-                country: "",
-                description: lines.slice(1).join("\n").trim() || chunk,
-                why: "",
-              };
-            });
+            return text.split(/\n\s*\n/)
+                .map(function (c) { return c.trim(); })
+                .filter(Boolean)
+                .map(function (chunk) {
+                    var lines = chunk.split('\n');
+                    return {
+                        name: lines[0].replace(/^[\s*#\-\d.)]+/, '').trim(),
+                        country: '',
+                        description: lines.slice(1).join('\n').trim() || chunk,
+                        why: ''
+                    };
+                });
         }
 
         // Create an HTML element with optional class and text content
@@ -222,20 +256,21 @@
 
         // Hide the carousel controls when there are no slides to navigate
         function hideControls() {
-          prevBtn.style.display = "none";
-          nextBtn.style.display = "none";
-          dotsBox.style.display = "none";
-          counter.style.display = "none";
-          if (hint) hint.style.display = "none";
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+            dotsBox.style.display = 'none';
+            counter.style.display = 'none';
+            if (hint) hint.style.display = 'none';
         }
 
         // Display a message inside the slide area when no valid results are found
         function showMessage(msg) {
-          slidesBox.innerHTML = "";
-          var slide = el("div", "slide active");
-          slide.appendChild(el("p", "message", msg));
-          slidesBox.appendChild(slide);
-          hideControls();
+            slidesBox.innerHTML = '';
+            var slide = el('div', 'slide active');
+            slide.style.cursor = 'default';
+            slide.appendChild(el('p', 'message', msg));
+            slidesBox.appendChild(slide);
+            hideControls();
         }
 
         // Switch the active slide and update the pagination indicator
@@ -255,77 +290,106 @@
         var payload = loadPayload();
 
         if (!payload) {
-          var msg =
-            "No recommendations found. Please submit your request from the question page.";
-          if (window.location.hash) {
-            msg =
-              "Data arrived in the URL but could not be read.\n\n" +
-              (lastError || "Unknown decoding error") +
-              "\n\nHash starts with: " +
-              window.location.hash.slice(1, 60) +
-              "...";
-          }
-          showMessage(msg);
-          return;
+            var msg = 'No recommendations found. Please submit your request from the question page.';
+            if (window.location.hash) {
+                msg = 'Data arrived in the URL but could not be read.\n\n' +
+                      (lastError || 'Unknown decoding error') +
+                      '\n\nHash starts with: ' + window.location.hash.slice(1, 60) + '...';
+            }
+            showMessage(msg);
+            return;
         }
 
-        var destinations = Array.isArray(payload.destinations)
-          ? payload.destinations
-          : [];
+        destinations = Array.isArray(payload.destinations) ? payload.destinations : [];
         if (!destinations.length && payload.raw && payload.raw.trim()) {
-          destinations = slicePlainText(payload.raw);
+            destinations = slicePlainText(payload.raw);
         }
-
         if (!destinations.length) {
-          showMessage(
-            "The server replied but no destinations could be read from the response.",
-          );
-          return;
+            showMessage('The server replied but no destinations could be read from the response.');
+            return;
         }
 
-        if (payload.question) {
-          document.getElementById("based-on").textContent =
-            'Based on your words: "' + payload.question + '"';
+        questionText = payload.question || '';
+        if (questionText) {
+            document.getElementById('based-on').textContent =
+                'Based on your words: "' + questionText + '"';
         }
 
-        slidesBox.innerHTML = "";
-        dotsBox.innerHTML = "";
+        slidesBox.innerHTML = '';
+        dotsBox.innerHTML = '';
 
         destinations.forEach(function (dest, i) {
-          var slide = el("div", "slide" + (i === 0 ? " active" : ""));
-          slide.appendChild(el("div", "rank", String(i + 1)));
-          slide.appendChild(
-            el("h3", null, dest.name || "Destination " + (i + 1)),
-          );
-          if (dest.country) slide.appendChild(el("p", "country", dest.country));
-          slide.appendChild(el("p", "description", dest.description || ""));
-          if (dest.why) slide.appendChild(el("p", "why", dest.why));
-          slidesBox.appendChild(slide);
+            var slide = el('div', 'slide' + (i === 0 ? ' active' : ''));
+            slide.setAttribute('role', 'button');
+            slide.setAttribute('tabindex', '0');
 
-          var dot = el("li", i === 0 ? "active" : null);
-          dot.addEventListener("click", function () {
-            goTo(i);
-          });
-          dotsBox.appendChild(dot);
+            slide.appendChild(el('div', 'num', String(i + 1)));
+
+            var heading = el('h3', null, dest.name || 'Destination ' + (i + 1));
+            heading.appendChild(el('span', 'rank-flag', ''));
+            slide.appendChild(heading);
+
+            if (dest.country) slide.appendChild(el('p', 'country', dest.country));
+            slide.appendChild(el('p', 'description', dest.description || ''));
+            if (dest.why) slide.appendChild(el('p', 'why', dest.why));
+
+            var btn = el('button', 'btn btn-default pick-btn', 'Pick this destination');
+            btn.type = 'button';
+            slide.appendChild(btn);
+
+            slide.addEventListener('click', function () { toggle(i); });
+            slide.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(i); }
+            });
+
+            slidesBox.appendChild(slide);
+
+            var dot = el('li', i === 0 ? 'active' : null);
+            dot.addEventListener('click', function () { goTo(i); });
+            dotsBox.appendChild(dot);
         });
 
-        prevBtn.addEventListener("click", function () {
-          goTo(current - 1);
+        prevBtn.addEventListener('click', function () { goTo(current - 1); });
+        nextBtn.addEventListener('click', function () { goTo(current + 1); });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'ArrowLeft')  goTo(current - 1);
+            if (e.key === 'ArrowRight') goTo(current + 1);
         });
-        nextBtn.addEventListener("click", function () {
-          goTo(current + 1);
-        });
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "ArrowLeft") goTo(current - 1);
-          if (e.key === "ArrowRight") goTo(current + 1);
-        });
+        clearAll.addEventListener('click', function () { picks = []; paint(); });
 
         if (destinations.length < 2) {
-          hideControls();
+            hideControls();
         } else {
-          counter.textContent = "1 / " + destinations.length;
+            counter.textContent = '1 / ' + destinations.length;
         }
-      })();
+
+        // Restore the ranking made earlier in this browser session
+        var saved = readPicks();
+        if (saved && Array.isArray(saved.picks)) {
+            saved.picks
+                .slice()
+                .sort(function (a, b) { return a.rank - b.rank; })
+                .forEach(function (entry) {
+                    var found = -1;
+                    for (var i = 0; i < destinations.length; i++) {
+                        if (destinations[i].name === entry.name) { found = i; break; }
+                    }
+                    if (found === -1 && typeof entry.index === 'number' && destinations[entry.index]) {
+                        found = entry.index;
+                    }
+                    if (found !== -1 && picks.indexOf(found) === -1) picks.push(found);
+                });
+            if (picks.length) goTo(picks[0]);
+        }
+        paint();
+
+        if (!COOKIES_OK) {
+            note.textContent = 'Note: the browser is blocking cookies on this page (usual when opening the ' +
+                               'file directly from disk), so your ranking is being kept in session storage instead. ' +
+                               'Serve the pages over http:// to use real cookies.';
+            note.style.display = 'block';
+        }
+    })();
     </script>
-  </body>
+</body>
 </html>
