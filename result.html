@@ -46,13 +46,37 @@
             cursor: pointer;                 /* the whole slide is clickable */
         }
         .slide.active {
-            display: block;
+            display: flex;                   /* photo on the left, text on the right */
+            gap: 24px;
+            align-items: flex-start;
             animation: fade 0.35s ease;
+        }
+        @media (max-width: 600px) {
+            .slide.active { flex-direction: column; }
         }
         @keyframes fade {
             from { opacity: 0; transform: translateX(12px); }
             to   { opacity: 1; transform: translateX(0); }
         }
+
+        /* --- destination photo --------------------------------------------- */
+        .slide .photo {
+            flex: 0 0 240px;
+            width: 240px;
+            height: 180px;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #e3e3e3 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='180'><rect width='240' height='180' fill='%23e3e3e3'/><text x='120' y='95' font-family='Arial' font-size='14' fill='%23999' text-anchor='middle'>No photo</text></svg>") center/cover no-repeat;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+        }
+        .slide .photo img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .slide .text { flex: 1 1 auto; min-width: 0; }
+
         .slide .num {
             display: inline-block;
             width: 34px; height: 34px; line-height: 34px;
@@ -72,6 +96,12 @@
             border-left: 3px solid #c7ddf0;
             color: #555;
         }
+        .slide .more {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+        .slide .more:after { content: " \2197"; }  /* ↗ */
 
         /* --- ranked selection ---------------------------------------------- */
         .slide.picked {
@@ -156,10 +186,13 @@
         #shortlist li {
             padding: 8px 6px;
             border-top: 1px solid #dceccd;
+            display: flex;
+            align-items: center;
         }
         #shortlist li:first-child { border-top: none; }
         #shortlist .pos {
             display: inline-block;
+            flex: 0 0 26px;
             width: 26px; height: 26px; line-height: 26px;
             margin-right: 10px;
             text-align: center;
@@ -169,8 +202,18 @@
             font-size: 13px;
             font-weight: bold;
         }
+        #shortlist .thumb {
+            flex: 0 0 48px;
+            width: 48px; height: 36px;
+            margin-right: 10px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e3e3e3;
+        }
+        #shortlist .label { flex: 1 1 auto; min-width: 0; }
         #shortlist .where { font-weight: bold; }
-        #shortlist .controls { float: right; }
+        #shortlist .label a { margin-left: 8px; font-size: 12px; }
+        #shortlist .controls { flex: 0 0 auto; margin-left: 10px; }
         #shortlist .controls button {
             border: 1px solid #c5dfb3;
             background: #fff;
@@ -288,7 +331,8 @@
                 try { sessionStorage.removeItem(COOKIE); } catch (e) {}
                 return;
             }
-            // Ranked list, position 1 = most wanted. Kept compact: cookies cap at ~4KB.
+            // Ranked list, position 1 = most wanted. Kept compact: cookies cap at ~4KB
+            // (so image/link URLs are deliberately NOT stored here).
             var ranked = picks.map(function (destIndex, position) {
                 var d = destinations[destIndex] || {};
                 return {
@@ -371,7 +415,9 @@
                         name: lines[0].replace(/^[\s*#\-\d.)]+/, '').trim(),
                         country: '',
                         description: lines.slice(1).join('\n').trim() || chunk,
-                        why: ''
+                        why: '',
+                        image_url: '',
+                        link: ''
                     };
                 });
         }
@@ -382,6 +428,72 @@
             if (className) node.className = className;
             if (text) node.textContent = text;   // textContent = safe, no HTML injection
             return node;
+        }
+
+        // Only http(s) URLs are ever put in src/href (blocks javascript: etc.)
+        function safeUrl(value) {
+            value = String(value || '').trim();
+            return /^https?:\/\//i.test(value) ? value : '';
+        }
+
+        // Ask Wikipedia (CORS-enabled, no key) for a photo of the place.
+        // Used when the server sent no image or the image failed to load.
+        function wikiPhoto(name, country) {
+            var q = encodeURIComponent((name + ' ' + (country || '')).trim());
+            var search = 'https://en.wikipedia.org/w/api.php?action=query&list=search&format=json' +
+                         '&origin=*&srlimit=1&srsearch=' + q;
+            return fetch(search).then(function (r) { return r.json(); })
+                .then(function (data) {
+                    var hits = (data.query && data.query.search) || [];
+                    var title = hits.length ? hits[0].title : name;
+                    return fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' +
+                                 encodeURIComponent(title.replace(/ /g, '_')));
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (info) {
+                    // Use the URL exactly as given; editing the size in it gets a 400.
+                    return (info.thumbnail && info.thumbnail.source) ||
+                           (info.originalimage && info.originalimage.source) || '';
+                })
+                .catch(function () { return ''; });
+        }
+
+        // Put an image into a container; on failure try Wikipedia once, then give up
+        // (the container's CSS background shows "No photo").
+        function loadPhoto(container, url, dest, className) {
+            var img = el('img', className);
+            img.alt = dest.name ? 'Photo of ' + dest.name : 'Destination photo';
+            img.loading = 'lazy';
+            img.referrerPolicy = 'no-referrer';
+            var triedWiki = false;
+
+            function fallback() {
+                if (triedWiki) { img.remove(); return; }
+                triedWiki = true;
+                wikiPhoto(dest.name || '', dest.country || '').then(function (alt) {
+                    if (alt && alt !== img.src) {
+                        dest.image_url = alt;        // so the shortlist thumbnail uses it too
+                        img.src = alt;
+                    } else {
+                        img.remove();
+                    }
+                });
+            }
+            img.addEventListener('error', fallback);
+            container.appendChild(img);
+
+            if (url) { img.src = url; } else { fallback(); }
+            return img;
+        }
+
+        // <a> that opens in a new tab and does NOT count as "picking" the slide
+        function externalLink(url, text, className) {
+            var a = el('a', className, text);
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.addEventListener('click', function (e) { e.stopPropagation(); });
+            return a;
         }
 
         function hideControls() {
@@ -450,6 +562,19 @@
                 var dest = destinations[destIndex] || {};
                 var row = document.createElement('li');
 
+                row.appendChild(el('span', 'pos', String(position + 1)));
+
+                // thumbnail next to the name
+                var thumb = loadPhoto(row, safeUrl(dest.image_url), dest, 'thumb');
+                thumb.alt = '';
+
+                var label = el('span', 'label');
+                label.appendChild(el('span', 'where', dest.name || 'Destination ' + (destIndex + 1)));
+                if (dest.country) label.appendChild(el('span', null, ', ' + dest.country));
+                var link = safeUrl(dest.link);
+                if (link) label.appendChild(externalLink(link, 'more', null));
+                row.appendChild(label);
+
                 var controls = el('span', 'controls');
 
                 var up = el('button', null, '▲');
@@ -473,10 +598,6 @@
                 controls.appendChild(down);
                 controls.appendChild(rm);
                 row.appendChild(controls);
-
-                row.appendChild(el('span', 'pos', String(position + 1)));
-                row.appendChild(el('span', 'where', dest.name || 'Destination ' + (destIndex + 1)));
-                if (dest.country) row.appendChild(el('span', null, ', ' + dest.country));
 
                 listEl.appendChild(row);
             });
@@ -540,19 +661,36 @@
             slide.setAttribute('role', 'button');
             slide.setAttribute('tabindex', '0');
 
-            slide.appendChild(el('div', 'num', String(i + 1)));
+            /* --- photo column (left) --- */
+            var photo = el('div', 'photo');
+            loadPhoto(photo, safeUrl(dest.image_url), dest, null);
+            slide.appendChild(photo);
+
+            /* --- text column (right) --- */
+            var text = el('div', 'text');
+            text.appendChild(el('div', 'num', String(i + 1)));
 
             var heading = el('h3', null, dest.name || 'Destination ' + (i + 1));
             heading.appendChild(el('span', 'rank-flag', ''));
-            slide.appendChild(heading);
+            text.appendChild(heading);
 
-            if (dest.country) slide.appendChild(el('p', 'country', dest.country));
-            slide.appendChild(el('p', 'description', dest.description || ''));
-            if (dest.why) slide.appendChild(el('p', 'why', dest.why));
+            if (dest.country) text.appendChild(el('p', 'country', dest.country));
+            text.appendChild(el('p', 'description', dest.description || ''));
+            if (dest.why) text.appendChild(el('p', 'why', dest.why));
+
+            var linkUrl = safeUrl(dest.link);
+            if (linkUrl) {
+                var host = '';
+                try { host = new URL(linkUrl).hostname.replace(/^www\./, ''); } catch (e) {}
+                text.appendChild(externalLink(linkUrl, 'Read more' + (host ? ' on ' + host : ''), 'more'));
+            }
 
             var btn = el('button', 'btn btn-default pick-btn', 'Pick this destination');
             btn.type = 'button';
-            slide.appendChild(btn);
+            text.appendChild(document.createElement('br'));
+            text.appendChild(btn);
+
+            slide.appendChild(text);
 
             slide.addEventListener('click', function () { toggle(i); });
             slide.addEventListener('keydown', function (e) {
